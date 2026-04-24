@@ -1,5 +1,4 @@
 // src/pages/Checkout.tsx
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Lock } from "lucide-react";
 import { useAppSelector } from "../store/hooks";
