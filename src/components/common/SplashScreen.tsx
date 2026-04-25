@@ -6,11 +6,14 @@ export const SplashScreen = () => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
+    // 1. Page load hote hi scroll disable kar do
+    document.body.style.overflow = "hidden";
+    
     const timer = setTimeout(() => {
       setIsVisible(false);
+      // 🚀 THE FIX: Splash screen gayab hone ke baad scroll WAPAS chalu kar do!
+      document.body.style.overflow = "auto";
     }, 2500);
-    
-    document.body.style.overflow = "hidden";
     
     return () => {
       clearTimeout(timer);
@@ -25,7 +28,7 @@ export const SplashScreen = () => {
           key="splash"
           initial={{ y: 0 }}
           exit={{ y: "-100%" }}
-          transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }} // Custom cubic-bezier for a sharp "Vercel-style" exit
+          transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }} 
           className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center overflow-hidden"
         >
           {/* Brand Name Reveal */}
@@ -51,7 +54,7 @@ export const SplashScreen = () => {
             </motion.p>
           </div>
 
-          {/* Optional: Minimal Loading Line */}
+          {/* Minimal Loading Line */}
           <motion.div 
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}

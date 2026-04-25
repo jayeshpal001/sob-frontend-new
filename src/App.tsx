@@ -1,21 +1,37 @@
 // src/App.tsx
-import { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Lenis from '@studio-freight/lenis';
+import { useEffect, lazy, Suspense } from "react";
+import { Routes, Route } from "react-router-dom";
+import Lenis from "@studio-freight/lenis";
 
-import { MainLayout } from './components/common/MainLayout';
-import { ProtectedRoute } from './components/common/ProtectedRoute';
-import { SplashScreen } from './components/common/SplashScreen'; // NAYA IMPORT
+import { MainLayout } from "./components/common/MainLayout";
+import { ProtectedRoute } from "./components/common/ProtectedRoute";
+import { SplashScreen } from "./components/common/SplashScreen";
+import { PageLoader } from "./components/common/PageLoader"; // NAYA IMPORT
 
-// Pages
-import { Home } from './pages/Home';
-import { ProductDetails } from './pages/ProductDetails';
-import { Collection } from './pages/Collection';
-import { Auth } from './pages/Auth';
-import { Checkout } from './pages/Checkout';
-import { Dashboard } from './pages/Dashboard';
-import { About } from './pages/About';
-import { NotFound } from './pages/NotFound';
+const Home = lazy(() =>
+  import("./pages/Home").then((m) => ({ default: m.Home })),
+);
+const Collection = lazy(() =>
+  import("./pages/Collection").then((m) => ({ default: m.Collection })),
+);
+const About = lazy(() =>
+  import("./pages/About").then((m) => ({ default: m.About })),
+);
+const ProductDetails = lazy(() =>
+  import("./pages/ProductDetails").then((m) => ({ default: m.ProductDetails })),
+);
+const Auth = lazy(() =>
+  import("./pages/Auth").then((m) => ({ default: m.Auth })),
+);
+const Checkout = lazy(() =>
+  import("./pages/Checkout").then((m) => ({ default: m.Checkout })),
+);
+const Dashboard = lazy(() =>
+  import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })),
+);
+const NotFound = lazy(() =>
+  import("./pages/NotFound").then((m) => ({ default: m.NotFound })),
+);
 
 function App() {
   useEffect(() => {
@@ -35,10 +51,9 @@ function App() {
   }, []);
 
   return (
-      <>
-        {/* Onboarding Splash Screen */}
-        <SplashScreen />
-        
+    <>
+      <SplashScreen />
+      <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route element={<MainLayout />}>
             {/* Public Routes */}
@@ -58,7 +73,8 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
-      </>
+      </Suspense>
+    </>
   );
 }
 

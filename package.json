@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.0",
     "@reduxjs/toolkit": "^2.11.2",
     "@studio-freight/lenis": "^1.0.42",
     "@tailwindcss/vite": "^4.2.4",
@@ -23,7 +25,8 @@
     "redux-persist": "^6.0.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
-    "tailwindcss": "^4.2.4"
+    "tailwindcss": "^4.2.4",
+    "three": "^0.184.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
