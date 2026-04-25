@@ -1,7 +1,7 @@
 // src/components/sections/HeroSection.tsx
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+// import { Link } from "react-router-dom";
+// import { ArrowRight } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import { LuxuryShape } from "../ui/LuxuryShape";
