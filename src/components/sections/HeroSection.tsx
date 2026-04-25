@@ -77,11 +77,11 @@ export const HeroSection = () => {
         </div>
 
         {/* Right Side: 3D Liquid + Marble + Bottle */}
-        {/* 🚀 FIX: Adjusted Height for Mobile (h-[400px]) so it doesn't overflow */}
+        {/*  FIX: Adjusted Height for Mobile (h-[400px]) so it doesn't overflow */}
         <div className="lg:col-span-7 relative flex items-center justify-center w-full h-[400px] md:h-[500px] lg:h-[750px] mt-6 lg:mt-0">
           
           {/* Layer 1: 3D Liquid Sphere */}
-          {/* 🚀 FIX: Reduced scale on mobile to prevent massive cutoff */}
+          {/*  FIX: Reduced scale on mobile to prevent massive cutoff */}
           <div className="absolute inset-0 z-0 flex items-center justify-center scale-[1.1] md:scale-[1.25] lg:scale-[1.6] lg:translate-x-20">
             <Canvas camera={{ position: [0, 0, 4], fov: 45 }}>
               <ambientLight intensity={0.5} />
@@ -100,14 +100,14 @@ export const HeroSection = () => {
           </div>
 
           {/* Layer 2: Marble Plinth */}
-          {/* 🚀 FIX: Added max-w-[280px] for mobile to keep elements perfectly centered and visible */}
+          {/*  FIX: Added max-w-[280px] for mobile to keep elements perfectly centered and visible */}
           <motion.img
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: "-10%", x: "-50%" }}
             transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
             src="/travertine-plinth.png" 
             alt="Luxury Base" 
-            className="absolute top-1/2 left-1/2 w-[75%] lg:w-[70%] max-w-[280px] lg:max-w-[450px] object-contain drop-shadow-xl z-10"
+            className="absolute top-1/2 left-1/2 w-[75%] lg:w-[70%] max-w-[280px] lg:max-w-[500px] object-contain drop-shadow-xl z-10"
             style={{ x: "-50%", y: "15%" }} 
           />
 
@@ -115,7 +115,7 @@ export const HeroSection = () => {
           <motion.div
             animate={{ y: ["-55%", "-62%", "-55%"], x: "-50%" }} 
             transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-            className="absolute top-1/2 left-1/2 w-[75%] lg:w-[70%] max-w-[280px] lg:max-w-[450px] z-20"
+            className="absolute top-1/2 left-1/2 w-[75%] lg:w-[70%] max-w-[280px] lg:max-w-[550px] z-20"
             style={{ x: "-50%", y: "-55%" }} 
           >
             <motion.img 
