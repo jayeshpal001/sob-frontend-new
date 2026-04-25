@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import { LuxuryShape } from "../ui/LuxuryShape";
+import { Button } from "../ui/Button"; // Added missing import
 
 export const HeroSection = () => {
   return (
@@ -22,66 +23,78 @@ export const HeroSection = () => {
 
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 items-center w-full max-w-[1600px] mx-auto px-6 md:px-12 gap-8 lg:gap-0 h-full">
         
-        {/* Left Side: Haute Parfumerie Typography & CTA */}
+        {/* Left Side: Typography & CTA */}
         <div className="lg:col-span-5 flex flex-col items-start text-left space-y-5 lg:space-y-6 z-30 pt-8 lg:pt-0">
-          <motion.span 
+          
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="uppercase tracking-[0.25em] text-[9px] lg:text-[10px] font-bold text-gray-400"
+            className="uppercase tracking-[0.3em] text-[10px] font-bold text-gray-500"
           >
-            Haute Parfumerie
-          </motion.span>
-          
+            Premium Fragrance House
+          </motion.div>
+
           <div className="flex flex-col leading-[1.0] lg:leading-[1.05]">
-            <motion.h1 
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="text-[4rem] sm:text-6xl md:text-7xl lg:text-[7.5rem] font-display font-normal text-[#111] tracking-tight"
-            >
-              Ethereal
-            </motion.h1>
-            <motion.h1 
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1.2, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="text-[4rem] sm:text-6xl md:text-7xl lg:text-[7.5rem] font-display font-normal text-[#777] tracking-tight italic"
-            >
-              Presence.
-            </motion.h1>
+            {/* Masked Reveal Animation for each line */}
+            <div className="overflow-hidden pb-2">
+              <motion.h1 
+                initial={{ y: "100%", rotate: 2 }}
+                animate={{ y: 0, rotate: 0 }}
+                transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="text-[4rem] sm:text-6xl md:text-7xl lg:text-[7.5rem] font-display font-normal text-gray-900 tracking-tight"
+              >
+                Unleash the
+              </motion.h1>
+            </div>
+            
+            <div className="overflow-hidden pb-2">
+              <motion.h1 
+                initial={{ y: "100%", rotate: 2 }}
+                animate={{ y: 0, rotate: 0 }}
+                transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="text-[4rem] sm:text-6xl md:text-7xl lg:text-[7.5rem] font-display font-normal text-gray-900 tracking-tight italic"
+              >
+                Essence of
+              </motion.h1>
+            </div>
+
+            <div className="overflow-hidden pb-2">
+              <motion.h1 
+                initial={{ y: "100%", rotate: 2 }}
+                animate={{ y: 0, rotate: 0 }}
+                transition={{ duration: 1.2, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="text-[4rem] sm:text-6xl md:text-7xl lg:text-[7.5rem] font-sans font-black text-black tracking-tighter"
+              >
+                Luxury.
+              </motion.h1>
+            </div>
           </div>
 
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="text-gray-500 max-w-sm text-sm lg:text-base leading-relaxed"
+            className="text-gray-600 max-w-md text-sm lg:text-base leading-relaxed"
           >
-            An olfactory masterpiece distilled from the world's rarest botanicals. A signature scent that doesn't just linger—it commands the room and captures the memory.
+            Crafted for those who refuse to blend in. Each scent tells a story of confidence, identity, and unapologetic elegance.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="pt-4 lg:pt-6"
+            transition={{ duration: 0.8, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-wrap gap-4 pt-4 lg:pt-6"
           >
-            <Link to="/collection" className="inline-block group pointer-events-auto">
-              <button className="bg-[#111] text-white px-6 py-4 lg:px-9 lg:py-5 flex items-center gap-3 lg:gap-4 text-[10px] lg:text-xs font-bold uppercase tracking-[0.2em] transition-all duration-500 group-hover:bg-[#222] lg:group-hover:pr-7">
-                Discover the Essence 
-                <ArrowRight className="w-3 h-3 lg:w-4 lg:h-4 transform group-hover:translate-x-2 transition-transform duration-500" />
-              </button>
-            </Link>
+            <Button variant="primary">Shop Now</Button>
+            <Button variant="outline">Our Story</Button>
           </motion.div>
         </div>
 
         {/* Right Side: 3D Liquid + Marble + Bottle */}
-        {/*  FIX: Adjusted Height for Mobile (h-[400px]) so it doesn't overflow */}
         <div className="lg:col-span-7 relative flex items-center justify-center w-full h-[400px] md:h-[500px] lg:h-[750px] mt-6 lg:mt-0">
           
           {/* Layer 1: 3D Liquid Sphere */}
-          {/*  FIX: Reduced scale on mobile to prevent massive cutoff */}
           <div className="absolute inset-0 z-0 flex items-center justify-center scale-[1.1] md:scale-[1.25] lg:scale-[1.6] lg:translate-x-20">
             <Canvas camera={{ position: [0, 0, 4], fov: 45 }}>
               <ambientLight intensity={0.5} />
@@ -100,7 +113,6 @@ export const HeroSection = () => {
           </div>
 
           {/* Layer 2: Marble Plinth */}
-          {/*  FIX: Added max-w-[280px] for mobile to keep elements perfectly centered and visible */}
           <motion.img
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: "-10%", x: "-50%" }}
