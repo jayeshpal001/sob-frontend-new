@@ -1,7 +1,6 @@
 // src/components/sections/HeroSection.tsx
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import { LuxuryShape } from "../ui/LuxuryShape";
@@ -83,10 +82,14 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-wrap gap-4 pt-4 lg:pt-6"
+            className="flex flex-wrap gap-4 pt-4 lg:pt-6 relative z-50 pointer-events-auto"
           >
-            <Button variant="primary">Shop Now</Button>
-            <Button variant="outline">Our Story</Button>
+            <Link to="/collection" className="block">
+              <Button variant="primary">Shop Now</Button>
+            </Link>
+            <Link to="/about" className="block">
+              <Button variant="outline">Our Story</Button>
+            </Link>
           </motion.div>
         </div>
 
@@ -94,10 +97,8 @@ export const HeroSection = () => {
         <div className="lg:col-span-7 relative flex items-center justify-center w-full h-[400px] md:h-[500px] lg:h-[750px] mt-6 lg:mt-0">
           
           {/* Layer 1: 3D Liquid Sphere */}
-          {/* 🚀 FIX: Changed scale and added lg:justify-end so it stays anchored to the right side */}
           <div className="absolute inset-0 z-0 flex items-center justify-center lg:justify-end pointer-events-none">
             <div className="w-full h-full flex items-center justify-center scale-[0.8] md:scale-100 lg:scale-[1.2] lg:translate-x-16 translate-y-[10%] lg:translate-y-0">
-              {/* 🚀 FIX: touchAction: 'auto' enables scrolling on mobile without issues */}
               <Canvas camera={{ position: [0, 0, 4], fov: 45 }} style={{ pointerEvents: 'none', touchAction: 'auto' }}>
                 <ambientLight intensity={0.5} />
                 <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
