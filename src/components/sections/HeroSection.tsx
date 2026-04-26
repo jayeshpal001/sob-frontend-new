@@ -1,11 +1,11 @@
 // src/components/sections/HeroSection.tsx
 import { motion } from "framer-motion";
-// import { Link } from "react-router-dom";
-// import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import { LuxuryShape } from "../ui/LuxuryShape";
-import { Button } from "../ui/Button"; // Added missing import
+import { Button } from "../ui/Button";
 
 export const HeroSection = () => {
   return (
@@ -36,7 +36,6 @@ export const HeroSection = () => {
           </motion.div>
 
           <div className="flex flex-col leading-[1.0] lg:leading-[1.05]">
-            {/* Masked Reveal Animation for each line */}
             <div className="overflow-hidden pb-2">
               <motion.h1 
                 initial={{ y: "100%", rotate: 2 }}
@@ -95,21 +94,25 @@ export const HeroSection = () => {
         <div className="lg:col-span-7 relative flex items-center justify-center w-full h-[400px] md:h-[500px] lg:h-[750px] mt-6 lg:mt-0">
           
           {/* Layer 1: 3D Liquid Sphere */}
-          <div className="absolute inset-0 z-0 flex items-center justify-center scale-[1.1] md:scale-[1.25] lg:scale-[1.6] lg:translate-x-20">
-            <Canvas camera={{ position: [0, 0, 4], fov: 45 }}>
-              <ambientLight intensity={0.5} />
-              <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
-              
-              <LuxuryShape />
-              
-              <Environment resolution={256}>
-                <group rotation={[-Math.PI / 4, -0.3, 0]}>
-                  <Lightformer intensity={20} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={[10, 10, 1]} />
-                  <Lightformer intensity={2} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={[10, 2, 1]} />
-                  <Lightformer intensity={2} rotation-y={-Math.PI / 2} position={[10, 1, 0]} scale={[20, 2, 1]} />
-                </group>
-              </Environment>
-            </Canvas>
+          {/* 🚀 FIX: Changed scale and added lg:justify-end so it stays anchored to the right side */}
+          <div className="absolute inset-0 z-0 flex items-center justify-center lg:justify-end pointer-events-none">
+            <div className="w-full h-full flex items-center justify-center scale-[0.8] md:scale-100 lg:scale-[1.2] lg:translate-x-16 translate-y-[10%] lg:translate-y-0">
+              {/* 🚀 FIX: touchAction: 'auto' enables scrolling on mobile without issues */}
+              <Canvas camera={{ position: [0, 0, 4], fov: 45 }} style={{ pointerEvents: 'none', touchAction: 'auto' }}>
+                <ambientLight intensity={0.5} />
+                <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
+                
+                <LuxuryShape />
+                
+                <Environment resolution={256}>
+                  <group rotation={[-Math.PI / 4, -0.3, 0]}>
+                    <Lightformer intensity={20} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={[10, 10, 1]} />
+                    <Lightformer intensity={2} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={[10, 2, 1]} />
+                    <Lightformer intensity={2} rotation-y={-Math.PI / 2} position={[10, 1, 0]} scale={[20, 2, 1]} />
+                  </group>
+                </Environment>
+              </Canvas>
+            </div>
           </div>
 
           {/* Layer 2: Marble Plinth */}
@@ -119,7 +122,7 @@ export const HeroSection = () => {
             transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
             src="/travertine-plinth.png" 
             alt="Luxury Base" 
-            className="absolute top-1/2 left-1/2 w-[75%] lg:w-[70%] max-w-[280px] lg:max-w-[500px] object-contain drop-shadow-xl z-10"
+            className="absolute top-1/2 left-1/2 w-[75%] lg:w-[70%] max-w-[280px] lg:max-w-[500px] object-contain drop-shadow-xl z-10 pointer-events-none"
             style={{ x: "-50%", y: "15%" }} 
           />
 
@@ -127,7 +130,7 @@ export const HeroSection = () => {
           <motion.div
             animate={{ y: ["-55%", "-62%", "-55%"], x: "-50%" }} 
             transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-            className="absolute top-1/2 left-1/2 w-[75%] lg:w-[70%] max-w-[280px] lg:max-w-[550px] z-20"
+            className="absolute top-1/2 left-1/2 w-[75%] lg:w-[70%] max-w-[280px] lg:max-w-[550px] z-20 pointer-events-auto"
             style={{ x: "-50%", y: "-55%" }} 
           >
             <motion.img 

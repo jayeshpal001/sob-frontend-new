@@ -59,35 +59,32 @@ export const Navbar = () => {
         className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100"
       >
         <div className="max-w-[1600px] mx-auto px-6 md:px-12 h-24 flex justify-between items-center">
-          {/* Left: Hamburger (Mobile Only) */}
-          <div className="w-1/3 flex lg:hidden">
+          
+          {/* Left: Hamburger (Mobile Only) & Logo */}
+          <div className="w-1/2 lg:w-1/3 flex items-center justify-start gap-4">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="p-2 -ml-2"
+              className="flex lg:hidden p-2 -ml-2"
             >
               <Menu strokeWidth={1.5} className="w-6 h-6" />
             </button>
-          </div>
-
-          {/* Left Space (Desktop) */}
-          <div className="w-1/3 hidden lg:block"></div>
-
-          {/* Center Logo */}
-          <div className="w-1/3 flex justify-center">
             <Link
               to="/"
-              className="relative flex items-center justify-center cursor-pointer group"
+              className="relative flex items-center cursor-pointer group"
             >
               <img
                 src="/sob-logo.jpg"
                 alt="SOB Fragrances"
-                className="h-12 lg:h-16 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+                className="h-10 lg:h-16 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
               />
             </Link>
           </div>
 
+          {/* Center Space (Desktop) to balance the layout */}
+          <div className="w-1/3 hidden lg:block"></div>
+
           {/* Right Navigation & Cart */}
-          <div className="w-1/3 flex justify-end items-center gap-6 lg:gap-8 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-900">
+          <div className="w-1/2 lg:w-1/3 flex justify-end items-center gap-6 lg:gap-8 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-900">
             <nav className="hidden lg:flex gap-8">
               {navLinks.map((link) => (
                 <Link
@@ -114,7 +111,7 @@ export const Navbar = () => {
               />
             </button>
 
-            {/* Dynamic User Route Navigation (Hidden on very small screens, moved to menu) */}
+            {/* Dynamic User Route Navigation */}
             <Link
               to={isAuthenticated ? "/dashboard" : "/auth"}
               className="hidden sm:flex relative items-center justify-center group"
