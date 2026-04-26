@@ -15,7 +15,7 @@ export const products: Product[] = [
       name: "Noir Absolu",
       tagline: "The Essence of Mystery",
       price: 145,
-      image: "/sob-perfume-bottle.png",
+      image: "/perfume-1.jpg",
       badge: "Bestseller",
       scentNotes: []
   },
@@ -24,7 +24,7 @@ export const products: Product[] = [
       name: "Azure Depths",
       tagline: "Power Redefined",
       price: 175,
-      image: "/sob-perfume-bottle.png",
+      image: "/perfume-2.jpg",
       scentNotes: []
   },
   {
@@ -32,7 +32,7 @@ export const products: Product[] = [
       name: "Blanc Éthéréal",
       tagline: "Elegance in Every Drop",
       price: 220,
-      image: "/sob-perfume-bottle.png",
+      image: "/perfume-3.jpg",
       scentNotes: []
   },
   {
@@ -40,7 +40,7 @@ export const products: Product[] = [
       name: "Obsidian Edge",
       tagline: "Unapologetically Bold",
       price: 295,
-      image: "/sob-perfume-bottle.png",
+      image: "/perfume-4.jpg",
       badge: "Limited Edition",
       scentNotes: []
   }

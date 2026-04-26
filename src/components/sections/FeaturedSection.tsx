@@ -15,7 +15,7 @@ const curatedProducts = [
     badge: "Bestseller",
     description: "A bold, intoxicating blend that captures the depth of midnight. Noir Absolu is crafted for those who dare to leave a lasting impression.",
     notes: ["Black Pepper", "Bergamot", "Cardamom", "Oud", "Amber"],
-    image: "/sob-perfume-bottle.png", // Replace with actual image path if different
+    image: "/perfume-1.jpg", 
     reverse: false,
   },
   {
@@ -25,8 +25,8 @@ const curatedProducts = [
     badge: "Limited Edition",
     description: "Raw power meets refined luxury. A dark, magnetic fragrance built on rare ingredients and absolute confidence.",
     notes: ["Black Truffle", "Elemi", "Pink Pepper", "Leather", "Oud"],
-    image: "/sob-perfume-bottle.png", 
-    reverse: true, // Image on the right
+    image: "/perfume-4.jpg", 
+    reverse: true, 
   },
 ];
 
