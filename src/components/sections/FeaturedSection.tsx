@@ -1,6 +1,6 @@
 // src/components/sections/FeaturedSection.tsx
 import { motion } from "framer-motion";
-import { ShoppingBag, ArrowRight } from "lucide-react";
+import { ShoppingBag} from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAppDispatch } from "../../store/hooks";
 import { addToCart } from "../../store/cartSlice";
@@ -68,7 +68,7 @@ export const FeaturedSection = () => {
 
         {/* Alternating Layout Grid */}
         <div className="flex flex-col space-y-32">
-          {curatedProducts.map((product, index) => (
+          {curatedProducts.map((product) => (
             <div 
               key={product.id} 
               className={`flex flex-col ${product.reverse ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-12 lg:gap-24`}
