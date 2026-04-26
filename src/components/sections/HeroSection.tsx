@@ -93,11 +93,11 @@ export const HeroSection = () => {
           </motion.div>
         </div>
 
-        {/* Right Side: 3D Liquid + Marble + Bottle */}
+        {/* Right Side: Marble + Bottle (3D Liquid Hidden on Mobile) */}
         <div className="lg:col-span-7 relative flex items-center justify-center w-full h-[400px] md:h-[500px] lg:h-[750px] mt-6 lg:mt-0">
           
-          {/* Layer 1: 3D Liquid Sphere */}
-          <div className="absolute inset-0 z-0 flex items-center justify-center lg:justify-end pointer-events-none">
+          {/* Layer 1: 3D Liquid Sphere (🚀 FIX: hidden on mobile, flex on lg screens) */}
+          <div className="absolute inset-0 z-0 hidden lg:flex items-center justify-center lg:justify-end pointer-events-none">
             <div className="w-full h-full flex items-center justify-center scale-[0.8] md:scale-100 lg:scale-[1.2] lg:translate-x-16 translate-y-[10%] lg:translate-y-0">
               <Canvas camera={{ position: [0, 0, 4], fov: 45 }} style={{ pointerEvents: 'none', touchAction: 'auto' }}>
                 <ambientLight intensity={0.5} />
