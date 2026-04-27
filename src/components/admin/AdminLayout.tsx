@@ -12,7 +12,7 @@ import {
   Image as ImageIcon, 
   LogOut, 
   Menu, 
-  X 
+  
 } from "lucide-react";
 import { useAppDispatch } from "../../store/hooks";
 // import { logout } from "../../store/authSlice"; // Aap isey baad mein enable kar sakte hain
@@ -30,7 +30,7 @@ const sidebarLinks = [
 export const AdminLayout = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const location = useLocation();
-  const dispatch = useAppDispatch();
+//   const dispatch = useAppDispatch();
 
   const handleLogout = () => {
     // dispatch(logout());
