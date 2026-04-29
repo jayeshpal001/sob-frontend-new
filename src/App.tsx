@@ -2,11 +2,12 @@
 import { useEffect, lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Lenis from "@studio-freight/lenis";
-
+import { Toaster } from "sonner"; 
 import { MainLayout } from "./components/common/MainLayout";
 import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import { SplashScreen } from "./components/common/SplashScreen";
 import { PageLoader } from "./components/common/PageLoader";
+import { AdminProtectedRoute } from "./components/admin/AdminProtectedRoute"; 
 
 // Customer Pages
 const Home = lazy(() =>
@@ -99,6 +100,9 @@ function App() {
 
   return (
     <>
+    
+      <Toaster position="top-right" />
+      
       <SplashScreen />
       <Suspense fallback={<PageLoader />}>
         <Routes>
@@ -107,17 +111,19 @@ function App() {
           ========================================= */}
           <Route path="/admin/login" element={<AdminLogin />} />
 
-          <Route path="/admin" element={<AdminLayout />}>
-            {/* Redirect /admin directly to dashboard */}
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="products" element={<AdminProducts />} />
-            <Route path="products/new" element={<AdminAddProduct />} />
-            <Route path="orders" element={<AdminOrders />} />
-            <Route path="categories" element={<AdminCategories />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="reviews" element={<AdminReviews />} />
-            <Route path="banners" element={<AdminBanners />} />
+          <Route element={<AdminProtectedRoute />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              {/* Redirect /admin directly to dashboard */}
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="products/new" element={<AdminAddProduct />} />
+              <Route path="orders" element={<AdminOrders />} />
+              <Route path="categories" element={<AdminCategories />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="reviews" element={<AdminReviews />} />
+              <Route path="banners" element={<AdminBanners />} />
+            </Route>
           </Route>
 
           {/* =========================================

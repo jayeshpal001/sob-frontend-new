@@ -1,23 +1,16 @@
 // src/pages/admin/AdminDashboard.tsx
-import { motion,type Variants } from "framer-motion"; 
-import { Users, ShoppingBag, CreditCard, ArrowRight } from "lucide-react";
+import { motion, type Variants } from "framer-motion"; 
+import { Users, ShoppingBag, CreditCard, ArrowRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-
-// Mock Data: Replace this with data from /api/admin/dashboard later
-const mockStats = {
-  totalUsers: 1248,
-  totalOrders: 432,
-  revenue: 84500,
-};
-
-const mockRecentOrders = [
-  { id: "#ORD-001", customer: "Aarav Sharma", date: "Apr 28, 2026", total: 245, status: "Pending" },
-  { id: "#ORD-002", customer: "Priya Patel", date: "Apr 27, 2026", total: 540, status: "Shipped" },
-  { id: "#ORD-003", customer: "Rohan Desai", date: "Apr 27, 2026", total: 175, status: "Delivered" },
-  { id: "#ORD-004", customer: "Neha Gupta", date: "Apr 26, 2026", total: 310, status: "Processing" },
-];
+import { useGetDashboardStatsQuery } from "../../store/adminApi"; 
 
 export const AdminDashboard = () => {
+  
+  const { data: response, isLoading, isError } = useGetDashboardStatsQuery();
+
+
+  const stats = response?.data || { totalUsers: 0, totalOrders: 0, totalRevenue: 0 };
+  const recentOrders = response?.data?.recentOrders || [];
 
   const container: Variants = {
     hidden: { opacity: 0 },
@@ -34,6 +27,7 @@ export const AdminDashboard = () => {
 
   // Helper for Status Badge styling
   const getStatusColor = (status: string) => {
+    if (!status) return 'bg-gray-50 text-gray-500 border-gray-200';
     switch (status.toLowerCase()) {
       case 'delivered': return 'bg-gray-100 text-gray-800 border-gray-200';
       case 'shipped': return 'bg-black text-white border-black';
@@ -42,6 +36,24 @@ export const AdminDashboard = () => {
       default: return 'bg-gray-50 text-gray-500 border-gray-200';
     }
   };
+
+  // Show a sleek loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="w-full h-[60vh] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-300" />
+      </div>
+    );
+  }
+
+  // Handle potential API errors gracefully
+  if (isError) {
+    return (
+      <div className="w-full py-12 text-center text-sm font-bold text-red-500 tracking-widest uppercase border border-red-100 bg-red-50">
+        Failed to load dashboard data. Ensure backend is active.
+      </div>
+    );
+  }
 
   return (
     <motion.div 
@@ -61,8 +73,8 @@ export const AdminDashboard = () => {
               <CreditCard className="w-5 h-5" />
             </div>
           </div>
-          <h3 className="text-4xl md:text-5xl font-display text-gray-900 tracking-tight">
-            ${mockStats.revenue.toLocaleString()}
+          <h3 className="text-4xl md:text-5xl  text-gray-900 tracking-tight">
+            ${stats.totalRevenue.toLocaleString()}
           </h3>
         </motion.div>
 
@@ -73,8 +85,8 @@ export const AdminDashboard = () => {
               <ShoppingBag className="w-5 h-5" />
             </div>
           </div>
-          <h3 className="text-4xl md:text-5xl font-display text-gray-900 tracking-tight">
-            {mockStats.totalOrders.toLocaleString()}
+          <h3 className="text-4xl md:text-5xl  text-gray-900 tracking-tight">
+            {stats.totalOrders.toLocaleString()}
           </h3>
         </motion.div>
 
@@ -85,8 +97,8 @@ export const AdminDashboard = () => {
               <Users className="w-5 h-5" />
             </div>
           </div>
-          <h3 className="text-4xl md:text-5xl font-display text-gray-900 tracking-tight">
-            {mockStats.totalUsers.toLocaleString()}
+          <h3 className="text-4xl md:text-5xl  text-gray-900 tracking-tight">
+            {stats.totalUsers.toLocaleString()}
           </h3>
         </motion.div>
 
@@ -114,28 +126,29 @@ export const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {mockRecentOrders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-8 py-5 text-sm font-semibold text-gray-900">{order.id}</td>
-                  <td className="px-8 py-5 text-sm text-gray-600">{order.customer}</td>
-                  <td className="px-8 py-5 text-sm text-gray-500">{order.date}</td>
-                  <td className="px-8 py-5">
-                    <span className={`px-3 py-1 text-[9px] font-bold uppercase tracking-widest border rounded-full ${getStatusColor(order.status)}`}>
-                      {order.status}
-                    </span>
+              {recentOrders.length > 0 ? (
+                recentOrders.map((order: any) => (
+                  <tr key={order._id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-8 py-5 text-sm font-semibold text-gray-900">{order._id.substring(0, 8)}...</td>
+                    <td className="px-8 py-5 text-sm text-gray-600">{order.user?.name || "Guest"}</td>
+                    <td className="px-8 py-5 text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
+                    <td className="px-8 py-5">
+                      <span className={`px-3 py-1 text-[9px] font-bold uppercase tracking-widest border rounded-full ${getStatusColor(order.status)}`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-8 py-5 text-sm font-semibold text-gray-900 text-right">${order.totalAmount}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="w-full py-12 text-center text-sm text-gray-400 tracking-widest uppercase">
+                    No recent orders found.
                   </td>
-                  <td className="px-8 py-5 text-sm font-semibold text-gray-900 text-right">${order.total}</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
-          
-          {/* Empty State Fallback */}
-          {mockRecentOrders.length === 0 && (
-            <div className="w-full py-12 text-center text-sm text-gray-400 tracking-widest uppercase">
-              No recent orders found.
-            </div>
-          )}
         </div>
 
       </motion.div>

@@ -1,7 +1,54 @@
 // src/services/api.ts
-import type{ Product, FilterParams } from "../types";
+import axios from "axios";
+import { toast } from "sonner";
+import type { Product, FilterParams } from "../types";
 
-// Extended Mock Data API standard ke hisaab se
+// ==========================================
+// 1. REAL API SETUP (Axios Instance)
+// ==========================================
+const api = axios.create({
+  // Make sure your backend runs on this URL, or use env variable
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Request Interceptor: Auto-inject Admin JWT Token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("adminToken"); 
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response Interceptor: Handle 401 Unauthorized globally
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("adminToken");
+      // Sirf admin routes se bahar feko
+      if (window.location.pathname.startsWith('/admin')) {
+        window.location.href = "/admin/login";
+        toast.error("Session expired. Please login again.");
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Default export is the real Axios instance
+export default api;
+
+
+// ==========================================
+// 2. MOCK DATA SETUP (For Public UI only)
+// ==========================================
 const mockDatabase: Product[] = [
   { id: "sob-01", name: "Noir Absolu", tagline: "The Essence of Mystery", price: 145, image: "/sob-perfume-bottle.png", badge: "Bestseller", scentNotes: ["Black Pepper", "Amber"], category: "unisex", inStock: true },
   { id: "sob-02", name: "Azure Depths", tagline: "Power Redefined", price: 175, image: "/sob-perfume-bottle.png", scentNotes: ["Sea Salt", "Cedar"], category: "mens", inStock: true },

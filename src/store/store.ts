@@ -5,6 +5,7 @@ import cartReducer from './cartSlice';
 import productReducer from './productSlice';
 import authReducer from './authSlice';
 import uiReducer from './uiSlice';
+import { adminApi } from './adminApi';
 
 // FIX: Custom Storage Wrapper for Vite compatibility
 const createCustomStorage = () => {
@@ -31,13 +32,14 @@ const rootReducer = combineReducers({
   products: productReducer,
   auth: authReducer,
   ui: uiReducer,
+  [adminApi.reducerPath]: adminApi.reducer, 
 });
 
 // 2. Configure Persist
 const persistConfig = {
   key: 'sob-luxe-root',
-  storage, // Using our custom Vite-safe storage
-  whitelist: ['cart', 'auth'], // Only save these
+  storage, 
+  whitelist: ['cart', 'auth'], 
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -50,7 +52,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }),
+    }).concat(adminApi.middleware), 
 });
 
 export const persistor = persistStore(store);
