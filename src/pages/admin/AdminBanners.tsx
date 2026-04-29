@@ -10,7 +10,7 @@ export const AdminBanners = () => {
   const [redirectUrl, setRedirectUrl] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const { data: response, isLoading, isError } = useGetBannersQuery();
+  const { data: response, isLoading } = useGetBannersQuery();
   const [createBanner, { isLoading: isCreating }] = useCreateBannerMutation();
   const [deleteBanner] = useDeleteBannerMutation();
 
