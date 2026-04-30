@@ -43,6 +43,12 @@ export const adminApi = createApi({
       query: () => "/api/admin/products",
       providesTags: ["Products"],
     }),
+    
+    getProductById: builder.query<any, string>({
+      query: (id) => `/api/admin/products/${id}`,
+      providesTags: ["Products"],
+    }),
+
     createProduct: builder.mutation<any, any>({
       query: (data) => ({
         url: "/api/admin/products",
@@ -66,19 +72,19 @@ export const adminApi = createApi({
       }),
       invalidatesTags: ["Products"],
     }),
+    
     // --- CATEGORIES ---
     getCategories: builder.query<any, void>({
       query: () => "/api/admin/categories",
       providesTags: ["Categories"],
     }),
-
     createCategory: builder.mutation<any, any>({
       query: (data) => ({
         url: "/api/admin/categories",
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Categories"], // Refresh list
+      invalidatesTags: ["Categories"],
     }),
     updateCategory: builder.mutation<any, { id: string; data: any }>({
       query: ({ id, data }) => ({
@@ -118,12 +124,11 @@ export const adminApi = createApi({
     toggleBlockUser: builder.mutation<any, { id: string; isBlocked: boolean }>({
       query: ({ id, isBlocked }) => ({
         url: `/api/admin/users/${id}/block`,
-        method: "PUT", // Aapki route definition ke hisaab se PUT
+        method: "PUT",
         body: { isBlocked },
       }),
       invalidatesTags: ["Users"],
     }),
-    // Search aur Filter ke liye query parameter base endpoint
     searchUsers: builder.query<any, string>({
       query: (query) => `/api/admin/users/search?q=${query}`,
       providesTags: ["Users"],
@@ -169,6 +174,7 @@ export const {
   useAdminLoginMutation,
   useGetDashboardStatsQuery,
   useGetProductsQuery,
+  useGetProductByIdQuery, 
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,

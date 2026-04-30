@@ -1,7 +1,7 @@
 // src/pages/admin/AdminOrders.tsx
 import { useState } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { Search, Filter, Eye, Loader2, X, MapPin, CreditCard, Package } from "lucide-react";
+import { Search, Eye, Loader2, X, MapPin,  Package } from "lucide-react";
 import { toast } from "sonner";
 import { useGetOrdersQuery, useUpdateOrderStatusMutation } from "../../store/adminApi"; 
 
@@ -11,7 +11,6 @@ export const AdminOrders = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
   
-  // 🚀 New State for Slide-over Panel
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
   const { data: responseData, isLoading, isError } = useGetOrdersQuery();
@@ -172,7 +171,6 @@ export const AdminOrders = () => {
         </motion.div>
       </motion.div>
 
-      {/* 🚀 SLIDE-OVER PANEL FOR ORDER DETAILS */}
       <AnimatePresence>
         {selectedOrder && (
           <>
