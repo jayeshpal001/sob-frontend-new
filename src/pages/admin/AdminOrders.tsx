@@ -15,7 +15,7 @@ export const AdminOrders = () => {
   const { data: responseData, isLoading, isError } = useGetOrdersQuery();
   const [updateStatus, { isLoading: isUpdating }] = useUpdateOrderStatusMutation();
 
-  // Extract orders safely from response
+  // Extract orders safely from response (handles { success: true, data: [...] })
   const orders = Array.isArray(responseData) ? responseData : responseData?.data || [];
 
   const container: Variants = {
@@ -41,7 +41,8 @@ export const AdminOrders = () => {
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
-      await updateStatus({ id: orderId, status: newStatus }).unwrap();
+      // Backend ko lowercase me status bhejna safe rehta hai JSON ke hisaab se
+      await updateStatus({ id: orderId, status: newStatus.toLowerCase() }).unwrap();
       toast.success(`Order #${orderId.substring(0, 8)} marked as ${newStatus}`, {
         style: { background: '#111', color: '#fff', borderRadius: '0px', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.1em' }
       });
@@ -51,9 +52,9 @@ export const AdminOrders = () => {
     }
   };
 
-  // Live Filtering Logic
+  // Live Filtering Logic mapped to new JSON keys
   const filteredOrders = orders.filter((order: any) => {
-    const customerName = order.user?.name || "Guest";
+    const customerName = order.userId?.name || "Guest";
     const matchesSearch = 
       order._id.toLowerCase().includes(searchTerm.toLowerCase()) || 
       customerName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -162,17 +163,18 @@ export const AdminOrders = () => {
                         #{order._id.substring(0, 8).toUpperCase()}
                       </span>
                       <span className="text-xs text-gray-500 mt-1">
-                        {new Date(order.createdAt).toLocaleDateString()}
+                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <span className="text-sm font-medium text-gray-900">
-                        {order.user?.name || "Guest User"}
+                        {/* 🚀 Mapped correctly to userId.name */}
+                        {order.userId?.name || "Guest"}
                       </span>
                       <span className="text-xs text-gray-500 mt-1">
-                        {order.user?.email || "N/A"}
+                        {order.userId?.email || "No Email"}
                       </span>
                     </div>
                   </td>
@@ -182,7 +184,8 @@ export const AdminOrders = () => {
                         ₹{order.totalAmount?.toLocaleString() || 0}
                       </span>
                       <span className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">
-                        {order.orderItems?.length || 1} Items
+                        {/* 🚀 Mapped correctly to products array length */}
+                        {order.products?.length || 0} Items
                       </span>
                     </div>
                   </td>
