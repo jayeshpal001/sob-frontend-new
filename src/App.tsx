@@ -8,6 +8,7 @@ import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import { SplashScreen } from "./components/common/SplashScreen";
 import { PageLoader } from "./components/common/PageLoader";
 import { AdminProtectedRoute } from "./components/admin/AdminProtectedRoute"; 
+import { AdminEditProduct } from "./pages/admin/AdminEditProduct";
 
 // Customer Pages
 const Home = lazy(() =>
@@ -118,6 +119,7 @@ function App() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="products" element={<AdminProducts />} />
               <Route path="products/new" element={<AdminAddProduct />} />
+              <Route path="products/edit/:id" element={<AdminEditProduct />} />
               <Route path="orders" element={<AdminOrders />} />
               <Route path="categories" element={<AdminCategories />} />
               <Route path="users" element={<AdminUsers />} />
