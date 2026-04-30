@@ -1,18 +1,19 @@
 // src/pages/admin/AdminReviews.tsx
 import { useState } from "react";
 import { motion, type Variants } from "framer-motion";
-import { Search, Filter, Trash2, MessageSquare, Loader2, Star } from "lucide-react";
+import { Search, Filter, Trash2, MessageSquare, Loader2, Star, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useGetReviewsQuery, useDeleteReviewMutation } from "../../store/adminApi"; // 🚀 RTK Query Hooks
+import { useGetReviewsQuery, useDeleteReviewMutation } from "../../store/adminApi"; 
 
 export const AdminReviews = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilter, setActiveFilter] = useState("All");
   
   const { data: responseData, isLoading, isError } = useGetReviewsQuery();
   const [deleteReview, { isLoading: isDeleting }] = useDeleteReviewMutation();
 
-  // Extract data array safely based on the JSON response
-  const reviews = responseData?.data || [];
+  // Extract data array safely based on the JSON response { success: true, data: [...] }
+  const reviews = Array.isArray(responseData) ? responseData : responseData?.data || [];
 
   const container: Variants = {
     hidden: { opacity: 0 },
@@ -37,17 +38,31 @@ export const AdminReviews = () => {
     }
   };
 
-  // Filter Logic
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'approved': return 'bg-green-50 text-green-700 border-green-200';
+      case 'rejected': return 'bg-red-50 text-red-700 border-red-200';
+      case 'pending': return 'bg-orange-50 text-orange-700 border-orange-200';
+      default: return 'bg-gray-50 text-gray-500 border-gray-200';
+    }
+  };
+
+  // 🚀 Filter Logic Mapped to Correct JSON Keys (userId.name & productId.name)
   const filteredReviews = reviews.filter((review: any) => {
-    const customerName = review.user?.name || review.name || "Unknown";
-    const productName = review.product?.name || "";
+    const customerName = review.userId?.name || "Guest User";
+    const customerEmail = review.userId?.email || "";
+    const productName = review.productId?.name || "Unknown Product";
     const comment = review.comment || "";
     
-    return (
+    const matchesSearch = 
       customerName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) || 
       productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      comment.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+      comment.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesFilter = activeFilter === "All" || review.status?.toLowerCase() === activeFilter.toLowerCase();
+
+    return matchesSearch && matchesFilter;
   });
 
   if (isLoading) {
@@ -97,6 +112,23 @@ export const AdminReviews = () => {
             More Filters
           </button>
         </div>
+
+        {/* Status Filter Pills */}
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+          {["All", "Approved", "Pending", "Rejected"].map((status) => (
+            <button
+              key={status}
+              onClick={() => setActiveFilter(status)}
+              className={`px-4 py-1.5 text-[10px] uppercase tracking-widest font-bold transition-colors border ${
+                activeFilter === status 
+                  ? "bg-[#111] text-white border-[#111]" 
+                  : "bg-transparent text-gray-500 border-gray-200 hover:border-gray-400"
+              }`}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
       </motion.div>
 
       {/* Reviews Table */}
@@ -113,7 +145,7 @@ export const AdminReviews = () => {
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Customer</th>
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Product</th>
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Rating & Comment</th>
-                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Date</th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Status</th>
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-right">Actions</th>
               </tr>
             </thead>
@@ -121,42 +153,63 @@ export const AdminReviews = () => {
               {filteredReviews.map((review: any) => (
                 <tr key={review._id} className="hover:bg-gray-50/80 transition-colors group">
                   <td className="px-6 py-4">
-                    <span className="text-sm font-semibold text-gray-900">
-                      {review.user?.name || review.name || "Guest"}
-                    </span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-gray-900">
+                        {review.userId?.name || "Guest"}
+                      </span>
+                      <span className="text-xs text-gray-500 mt-1">
+                        {review.userId?.email || "No Email"}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-gray-600">
-                      {review.product?.name || "Unknown Product"}
+                    <span className="text-sm text-gray-600 font-medium">
+                      {review.productId?.name || "Unknown Product"}
                     </span>
                   </td>
                   <td className="px-6 py-4 max-w-xs">
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1.5">
                       <div className="flex text-[#111]">
                         {[...Array(5)].map((_, i) => (
                           <Star 
                             key={i} 
-                            className={`w-3 h-3 ${i < (review.rating || 0) ? 'fill-current' : 'text-gray-300'}`} 
+                            className={`w-3.5 h-3.5 ${i < (review.rating || 0) ? 'fill-current' : 'text-gray-200'}`} 
                           />
                         ))}
                       </div>
-                      <p className="text-xs text-gray-600 line-clamp-2" title={review.comment}>
-                        {review.comment || "No comment provided."}
+                      <p className="text-sm text-gray-700 italic border-l-2 border-gray-200 pl-3">
+                        "{review.comment || "No comment provided."}"
                       </p>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs text-gray-500">
-                    {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : "N/A"}
+                  <td className="px-6 py-4">
+                     <span className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest border rounded ${getStatusColor(review.status)}`}>
+                      {review.status || "Pending"}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button 
-                      onClick={() => handleDelete(review._id)}
-                      disabled={isDeleting}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50" 
-                      title="Delete Review"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex justify-end items-center gap-2">
+                      {/* Optional: Add status change buttons if needed later */}
+                      {review.status === 'pending' && (
+                        <>
+                           <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors" title="Approve">
+                            <CheckCircle className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors" title="Reject">
+                            <XCircle className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                      
+                      <button 
+                        onClick={() => handleDelete(review._id)}
+                        disabled={isDeleting}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50 ml-2" 
+                        title="Delete Review"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -164,7 +217,7 @@ export const AdminReviews = () => {
           </table>
           
           {filteredReviews.length === 0 && (
-            <div className="w-full py-16 flex flex-col items-center justify-center text-center">
+            <div className="w-full py-16 flex flex-col items-center justify-center text-center border-t border-gray-100">
               <MessageSquare className="w-12 h-12 text-gray-200 mb-4" />
               <p className="text-sm text-gray-400 uppercase tracking-widest font-bold">No reviews found.</p>
               <p className="text-xs text-gray-400 mt-1">When customers leave reviews, they will appear here.</p>
