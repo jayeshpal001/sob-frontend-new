@@ -1,4 +1,3 @@
-// src/pages/Auth.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,6 +27,7 @@ export const Auth = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // <-- ADDED
   const [otp, setOtp] = useState("");
 
   // API Mutations
@@ -44,6 +44,15 @@ export const Auth = () => {
 
     if (!email || !password || (!isLogin && !name)) {
       toast.error("MISSING FIELDS", { description: "Please fill in all the required details." });
+      return;
+    }
+
+    // <-- ADDED VALIDATION
+    if (!isLogin && password !== confirmPassword) {
+      toast.error("PASSWORD MISMATCH", { 
+        description: "Your passwords do not match. Please try again.",
+        style: { background: '#FFF0F0', color: '#D92D20', border: '1px solid #FDA29B', borderRadius: '0px', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px', fontWeight: 'bold' }
+      });
       return;
     }
 
@@ -159,6 +168,16 @@ export const Auth = () => {
                   required value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading}
                   className="w-full border-b border-gray-300 py-3 bg-transparent text-sm focus:outline-none focus:border-black transition-colors disabled:opacity-50"
                 />
+                
+                {/* <-- ADDED CONFIRM PASSWORD INPUT */}
+                {!isLogin && (
+                  <input 
+                    type="password" 
+                    placeholder="Confirm Password" 
+                    required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} disabled={isLoading}
+                    className="w-full border-b border-gray-300 py-3 bg-transparent text-sm focus:outline-none focus:border-black transition-colors disabled:opacity-50"
+                  />
+                )}
 
                 <Button type="submit" className="w-full mt-4 flex justify-center items-center gap-2" disabled={isLoading}>
                   {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -170,7 +189,12 @@ export const Auth = () => {
                 {isLogin ? "Don't have an account?" : "Already have an account?"}
                 <button 
                   type="button" disabled={isLoading}
-                  onClick={() => { setIsLogin(!isLogin); setName(""); setPassword(""); }}
+                  onClick={() => { 
+                    setIsLogin(!isLogin); 
+                    setName(""); 
+                    setPassword(""); 
+                    setConfirmPassword(""); // <-- ADDED RESET
+                  }}
                   className="font-bold text-black uppercase tracking-widest text-[10px] hover:underline disabled:opacity-50"
                 >
                   {isLogin ? "Create One" : "Sign In"}
