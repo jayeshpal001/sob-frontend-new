@@ -61,7 +61,7 @@ export const Auth = () => {
       if (isLogin) {
         response = await loginUser({ email, password }).unwrap();
       } else {
-        response = await registerUser({ name, email, password }).unwrap();
+        response = await registerUser({ name, email, password, confirmPassword }).unwrap();
       }
 
       toast.success(response.message || "OTP sent to your email!", {
