@@ -10,26 +10,59 @@ import { Button } from "../../components/ui/Button";
 import { MyOrders } from "../../components/profile/MyOrders";
 import { AddressBook } from "../../components/profile/AddressBook";
 
-import { useGetProfileQuery } from "../../store/api/userApi"; 
+// State Management & API Hooks
+import { useAppDispatch } from "../../store/hooks";
+import { logout } from "../../store/slices/authSlice";
+import { useGetProfileQuery, useLogoutUserMutation } from "../../store/api/userApi"; 
 
 type TabType = 'orders' | 'addresses' | 'payments';
 
 export const Profile = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabType>('orders');
+  const dispatch = useAppDispatch();
   
+  const [activeTab, setActiveTab] = useState<TabType>('orders');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  
+  // API Hooks
   const { data: profileResponse, isLoading: isLoadingProfile } = useGetProfileQuery();
+  const [logoutUserApi, { isLoading: isLoggingOut }] = useLogoutUserMutation();
   
   const localUser = JSON.parse(localStorage.getItem("userData") || "{}");
   const user = profileResponse?.data || profileResponse || localUser;
 
-  const handleLogout = () => {
-    localStorage.removeItem("userToken");
-    localStorage.removeItem("userData");
-    toast.success("Logged out successfully", {
-      style: { background: '#111', color: '#fff', borderRadius: '0px', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.1em' }
-    });
-    navigate("/auth");
+  // 1. Open Logout Confirmation Modal
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  // 2. Perform Secure API Logout
+  const confirmLogout = async () => {
+    try {
+      // Invalidate session on the backend
+      await logoutUserApi().unwrap();
+      
+      // Clear Global Redux State
+      dispatch(logout());
+      
+      // Clear Local Storage fallbacks
+      localStorage.removeItem("userToken");
+      localStorage.removeItem("userData");
+      
+      toast.success("Logged out successfully", {
+        style: { background: '#111', color: '#fff', borderRadius: '0px', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.1em' }
+      });
+      
+      // Redirect to Auth page
+      navigate("/auth");
+    } catch (error) {
+      console.error("Logout failed on server, forcing local logout:", error);
+      // Ensure local state is cleared even if the network request fails
+      dispatch(logout());
+      localStorage.removeItem("userToken");
+      localStorage.removeItem("userData");
+      navigate("/auth");
+    }
   };
 
   return (
@@ -88,7 +121,7 @@ export const Profile = () => {
               </div>
               
               <div className="p-6 bg-white">
-                <Button variant="outline" className="w-full flex items-center justify-center gap-2" onClick={handleLogout}>
+                <Button variant="outline" className="w-full flex items-center justify-center gap-2" onClick={handleLogoutClick}>
                   <LogOut className="w-4 h-4" /> Sign Out
                 </Button>
               </div>
@@ -133,6 +166,52 @@ export const Profile = () => {
 
         </div>
       </div>
+
+      {/* Animated Logout Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 20 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="bg-white max-w-sm w-full p-8 shadow-2xl border border-gray-200 text-center"
+            >
+              <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5 border border-red-100">
+                <LogOut className="w-6 h-6 text-red-600 ml-1" />
+              </div>
+              <h3 className="text-xl font-display text-gray-900 mb-2">End Session?</h3>
+              <p className="text-sm text-gray-500 mb-8">
+                Are you sure you want to log out? You will need to sign in again to access your account.
+              </p>
+              
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => setShowLogoutModal(false)}
+                  disabled={isLoggingOut}
+                  className="flex-1 py-3 bg-gray-50 text-gray-600 text-[10px] font-bold uppercase tracking-[0.2em] border border-gray-200 hover:bg-gray-100 hover:text-black transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmLogout}
+                  disabled={isLoggingOut}
+                  className="flex-1 py-3 bg-[#111] text-white text-[10px] flex items-center justify-center gap-2 font-bold uppercase tracking-[0.2em] hover:bg-red-600 transition-colors shadow-md disabled:opacity-70"
+                >
+                  {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Logout'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 };
