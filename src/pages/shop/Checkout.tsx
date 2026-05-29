@@ -1,7 +1,7 @@
 // src/pages/Checkout.tsx
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Lock, Loader2, CreditCard, Truck } from "lucide-react";
+import { ArrowLeft, Lock, Loader2, CreditCard, Truck, Ticket, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { Button } from "../../components/ui/Button";
@@ -13,7 +13,9 @@ import {
   useCheckoutOrderMutation, 
   useVerifyPaymentMutation,
   useAddAddressMutation,       
-  useGetDefaultAddressQuery   
+  useGetDefaultAddressQuery,
+  useApplyCouponMutation,
+  useGetUserSettingsQuery 
 } from "../../store/api/userApi";
 
 const loadRazorpayScript = () => {
@@ -32,12 +34,20 @@ export const Checkout = () => {
   const { user } = useAppSelector((state) => state.auth);
   
   const { data: dbCartResponse, isLoading: isFetchingCart } = useGetCartQuery();
+  
+  //  Fetch Dynamic Settings (Tax & Delivery)
+  const { data: settingsResponse } = useGetUserSettingsQuery();
+  const settings = settingsResponse?.data || { taxPercentage: 18, deliveryCharge: 100, freeDeliveryThreshold: 1500 };
+
   const [checkoutOrder, { isLoading: isProcessing }] = useCheckoutOrderMutation();
   const [verifyPayment] = useVerifyPaymentMutation();
 
-  //  Address APIs
+  // Address APIs
   const [addAddress] = useAddAddressMutation();
   const { data: defaultAddressResponse } = useGetDefaultAddressQuery();
+
+  // Coupon API
+  const [applyCouponApi, { isLoading: isApplying }] = useApplyCouponMutation();
 
   const [formData, setFormData] = useState({
     email: user?.email || "",
@@ -51,7 +61,11 @@ export const Checkout = () => {
   });
   
   const [paymentMethod, setPaymentMethod] = useState<"ONLINE" | "COD">("ONLINE");
-  const [saveAddressToProfile, setSaveAddressToProfile] = useState(true); // Checkbox state
+  const [saveAddressToProfile, setSaveAddressToProfile] = useState(true);
+  
+  // Coupon States
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
 
   useEffect(() => {
     if (defaultAddressResponse?.success && defaultAddressResponse?.data) {
@@ -79,7 +93,6 @@ export const Checkout = () => {
   
   const cartItems = rawDbItems.map((item: any) => {
     let imageUrl = "/placeholder-image.png";
-    // Using the same robust image logic we built earlier
     if (item.product?.images && item.product.images.length > 0) {
       const img = typeof item.product.images[0] === 'string' ? item.product.images[0] : item.product.images[0]?.url;
       if (img) {
@@ -97,9 +110,40 @@ export const Checkout = () => {
     };
   });
 
-  const subtotal = rawDbCart.subtotal || 0;
-  const tax = rawDbCart.tax || 0;
-  const total = rawDbCart.total || 0;
+  //  SMART DYNAMIC BILLING CALCULATION
+  const subtotal = cartItems.reduce((total: number, item: any) => total + item.price * item.quantity, 0);
+  
+  // Apply Dynamic Tax
+  const tax = (subtotal * settings.taxPercentage) / 100;
+  
+  // Apply Dynamic Delivery Logic
+  const isFreeDelivery = subtotal >= settings.freeDeliveryThreshold;
+  const deliveryFee = isFreeDelivery ? 0 : settings.deliveryCharge;
+  
+  // Apply Discount
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  
+  // Final Total Formula
+  const finalTotal = Math.max(0, subtotal + tax + deliveryFee - discountAmount);
+
+  // Handle Coupon Apply
+  const handleApplyCoupon = async () => {
+    if (!couponCode) return;
+    try {
+      const res = await applyCouponApi({ code: couponCode, cartTotal: subtotal }).unwrap();
+      setAppliedCoupon(res.data);
+      toast.success("Coupon applied successfully!", {
+        style: { background: '#111', color: '#fff', borderRadius: '0px' }
+      });
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Invalid Coupon");
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+  };
 
   const handlePlaceOrder = async () => {
     if (!formData.addressLine || !formData.city || !formData.postalCode || !formData.phone) {
@@ -108,7 +152,6 @@ export const Checkout = () => {
     }
 
     try {
-      //  AUTO-SAVE ADDRESS TO PROFILE
       if (saveAddressToProfile) {
         try {
           await addAddress({
@@ -124,7 +167,7 @@ export const Checkout = () => {
         }
       }
 
-      const payload = {
+      const payload: any = {
         products: cartItems, 
         address: {
           name: `${formData.firstName} ${formData.lastName}`.trim(), 
@@ -137,6 +180,10 @@ export const Checkout = () => {
         },
         paymentMethod: paymentMethod 
       };
+
+      if (appliedCoupon) {
+        payload.couponCode = appliedCoupon.couponCode;
+      }
 
       const orderResponse = await checkoutOrder(payload).unwrap();
 
@@ -289,7 +336,7 @@ export const Checkout = () => {
                   />
                 </div>
                 
-                {/*  Save Address Checkbox */}
+                {/* Save Address Checkbox */}
                 <div className="pt-4 flex items-center gap-3">
                   <input 
                     type="checkbox" 
@@ -336,7 +383,7 @@ export const Checkout = () => {
                   className="w-full max-w-sm flex items-center justify-center gap-2"
                 >
                   {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
-                  {isProcessing ? "Processing..." : paymentMethod === "ONLINE" ? `Pay ₹${total.toLocaleString()}` : "Place Order (COD)"}
+                  {isProcessing ? "Processing..." : paymentMethod === "ONLINE" ? `Pay ₹${Math.round(finalTotal).toLocaleString()}` : "Place Order (COD)"}
                 </Button>
                 {paymentMethod === "ONLINE" && (
                   <p className="text-gray-500 text-[10px] uppercase tracking-widest mt-4">Secured by Razorpay (256-bit Encryption)</p>
@@ -350,7 +397,8 @@ export const Checkout = () => {
           <div className="lg:col-span-5 lg:sticky lg:top-32 bg-[var(--color-surface)] p-8 lg:p-10 border border-gray-100">
             <h2 className="font-sans font-bold text-sm uppercase tracking-widest text-black mb-8">Order Summary</h2>
             
-            <div className="flex flex-col gap-6 mb-8 max-h-[40vh] overflow-y-auto pr-2">
+            {/* Products List */}
+            <div className="flex flex-col gap-6 mb-8 max-h-[35vh] overflow-y-auto pr-2 custom-scrollbar">
               {cartItems.length === 0 ? (
                 <p className="text-sm text-gray-500">Your cart is empty.</p>
               ) : (
@@ -369,18 +417,77 @@ export const Checkout = () => {
               )}
             </div>
 
-            <div className="border-t border-gray-200 pt-6 space-y-4 font-sans text-sm">
+            {/* ====== COUPON COMPONENT ====== */}
+            <div className="mb-6 pb-6 border-b border-gray-200">
+              {!appliedCoupon ? (
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={couponCode} 
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder="ENTER COUPON CODE" 
+                    className="flex-1 border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-black uppercase tracking-widest bg-white"
+                  />
+                  <button 
+                    onClick={handleApplyCoupon} 
+                    disabled={isApplying || !couponCode}
+                    className="bg-black text-white px-6 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gray-800 disabled:opacity-50 transition-colors flex items-center justify-center"
+                  >
+                    {isApplying ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between bg-green-50 border border-green-100 p-4">
+                  <div className="flex items-center gap-2 text-green-800">
+                    <Ticket className="w-4 h-4" />
+                    <span className="text-sm font-bold tracking-widest">{appliedCoupon.couponCode} APPLIED</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-bold text-green-700">- ₹{appliedCoupon.discountAmount.toLocaleString()}</span>
+                    <button onClick={handleRemoveCoupon} className="text-gray-400 hover:text-red-500 transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* ====== END COUPON ====== */}
+
+            {/* Calculations Breakdown */}
+            <div className="space-y-4 font-sans text-sm">
               <div className="flex justify-between text-gray-500">
                 <span>Subtotal</span>
                 <span>₹{subtotal.toLocaleString()}</span>
               </div>
+              
+              {appliedCoupon && (
+                <div className="flex justify-between text-green-600 font-medium">
+                  <span>Discount ({appliedCoupon.couponCode})</span>
+                  <span>- ₹{appliedCoupon.discountAmount.toLocaleString()}</span>
+                </div>
+              )}
+
+              {/*  Dynamic Tax Calculation */}
               <div className="flex justify-between text-gray-500">
-                <span>Estimated Tax (18%)</span>
-                <span>₹{tax.toLocaleString()}</span>
+                <span>Tax ({settings.taxPercentage}%)</span>
+                <span>₹{Math.round(tax).toLocaleString()}</span>
               </div>
+
+              {/*  Dynamic Delivery Calculation */}
+              <div className="flex justify-between text-gray-500">
+                <span className="flex items-center gap-2"><Truck className="w-4 h-4" /> Delivery</span>
+                <span>
+                  {isFreeDelivery ? (
+                    <span className="text-[10px] bg-green-50 text-green-600 font-bold uppercase tracking-widest px-2 py-1 border border-green-200">Free</span>
+                  ) : (
+                    `₹${deliveryFee.toLocaleString()}`
+                  )}
+                </span>
+              </div>
+              
               <div className="flex justify-between text-black font-bold text-lg pt-4 border-t border-gray-200">
                 <span className="uppercase tracking-widest text-xs self-end pb-1">Total</span>
-                <span>₹{total.toLocaleString()}</span>
+                <span>₹{Math.round(finalTotal).toLocaleString()}</span>
               </div>
             </div>
 

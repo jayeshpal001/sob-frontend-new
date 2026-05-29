@@ -1,25 +1,25 @@
 // src/components/profile/MyOrders.tsx
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Package, Loader2, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Package, Loader2, CheckCircle2, Clock, XCircle, Ticket } from "lucide-react"; // <-- Ticket import kiya
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 
-//  Imported the cancel mutation here
+// Imported the cancel mutation here
 import { useGetMyOrdersQuery, useCancelOrderMutation } from "../../store/api/userApi";
 import { OrderDetailsModal } from "./OrderDetailsModal";
 
 export const MyOrders = () => {
   const { data: ordersResponse, isLoading: isLoadingOrders } = useGetMyOrdersQuery();
   
-  //  Initialized the cancel order hook
+  // Initialized the cancel order hook
   const [cancelOrder, { isLoading: isCancelling }] = useCancelOrderMutation();
 
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   const myOrders = ordersResponse?.data || [];
 
-  //  Implemented the actual API call logic
+  // Implemented the actual API call logic
   const handleCancelOrder = async (orderId: string) => {
     if (!window.confirm("Are you sure you want to cancel this order? This action cannot be undone.")) return;
     
@@ -88,8 +88,16 @@ export const MyOrders = () => {
                   <div className="flex-1 space-y-2">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Items</p>
                     <p className="font-sans text-sm font-medium text-gray-800">
-                      {order.products.length} {order.products.length === 1 ? 'Product' : 'Products'} Totaling ₹{order.totalAmount.toLocaleString()}
+                      {order.products?.length || 0} {order.products?.length === 1 ? 'Product' : 'Products'} Totaling ₹{order.totalAmount?.toLocaleString() || 0}
                     </p>
+                    
+                    {/*  COUPON HIGHLIGHT */}
+                    {order.couponCode && order.discountAmount > 0 && (
+                      <p className="text-xs font-bold text-green-600 mt-1 flex items-center gap-1 uppercase tracking-widest">
+                        <Ticket className="w-3 h-3" /> {order.couponCode} APPLIED (-₹{order.discountAmount.toLocaleString()})
+                      </p>
+                    )}
+
                     <div className="flex items-center gap-2 mt-2">
                       <span className="text-xs text-gray-500 bg-white px-2 py-1 border border-gray-200 uppercase tracking-wider font-bold">
                         {order.paymentMethod}
@@ -114,9 +122,9 @@ export const MyOrders = () => {
                   <div className="flex-1 md:text-right space-y-2">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Shipped To</p>
                     <p className="font-sans text-xs text-gray-700 leading-relaxed">
-                      <span className="font-bold block mb-1">{order.address.name}</span>
-                      {order.address.addressLine}<br/>
-                      {order.address.city}, {order.address.state} - {order.address.pincode}
+                      <span className="font-bold block mb-1">{order.address?.name}</span>
+                      {order.address?.addressLine}<br/>
+                      {order.address?.city}, {order.address?.state} - {order.address?.pincode}
                     </p>
                   </div>
                 </div>
@@ -124,7 +132,7 @@ export const MyOrders = () => {
                 {/* Status Footer & Actions */}
                 <div className="bg-white p-4 border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${order.status === 'confirmed' ? 'bg-green-500' : order.status === 'cancelled' ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
+                    <div className={`w-2 h-2 rounded-full ${order.status === 'confirmed' || order.status === 'delivered' ? 'bg-green-500' : order.status === 'cancelled' ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
                     <span className="text-xs font-bold uppercase tracking-widest text-gray-700">
                       Status: {order.status}
                     </span>
@@ -134,7 +142,7 @@ export const MyOrders = () => {
                     {(order.status === 'pending' || order.status === 'confirmed') && (
                       <button 
                         onClick={() => handleCancelOrder(order._id)}
-                        disabled={isCancelling} //  Disable while processing
+                        disabled={isCancelling} 
                         className="text-[10px] font-bold uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
                       >
                         Cancel Order

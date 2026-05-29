@@ -1,5 +1,5 @@
 // src/pages/admin/AdminUsers.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Search, Filter, ShieldAlert, ShieldCheck, Loader2, Eye, X, MapPin, User as UserIcon, Calendar, Mail } from "lucide-react";
 import { toast } from "sonner";
@@ -9,7 +9,6 @@ export const AdminUsers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
   
-  // 🚀 New States for Filters and Slide-over Drawer
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [roleFilter, setRoleFilter] = useState("All");
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
@@ -18,6 +17,35 @@ export const AdminUsers = () => {
   const [toggleBlock, { isLoading: isToggling }] = useToggleBlockUserMutation();
 
   const users = responseData?.users || [];
+
+  // 🚀 ULTIMATE SCROLL LOCK FOR ADMIN MODAL
+  useEffect(() => {
+    if (!selectedUser) return;
+
+    const rootEl = document.getElementById("root");
+    const scrollY = window.scrollY || (rootEl ? rootEl.scrollTop : 0);
+
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.style.overflowY = 'scroll'; 
+
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflowY = '';
+
+      document.documentElement.style.scrollBehavior = "auto";
+      
+      window.scrollTo(0, scrollY);
+      if (rootEl) {
+        rootEl.scrollTop = scrollY;
+      }
+
+      document.documentElement.style.scrollBehavior = "";
+    };
+  }, [selectedUser]);
 
   const container: Variants = {
     hidden: { opacity: 0 },
@@ -41,7 +69,6 @@ export const AdminUsers = () => {
         style: { background: '#111', color: '#fff', borderRadius: '0px', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.1em' }
       });
       
-      // Update local drawer state if open
       if (selectedUser && selectedUser._id === userId) {
         setSelectedUser({ ...selectedUser, isBlocked: !currentStatus });
       }
@@ -50,7 +77,6 @@ export const AdminUsers = () => {
     }
   };
 
-  // 🚀 Upgraded Filtering Logic
   const filteredUsers = users.filter((user: any) => {
     const matchesSearch = 
       (user.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
@@ -99,7 +125,6 @@ export const AdminUsers = () => {
               />
             </div>
             
-            {/* 🚀 Functional "More Filters" Button */}
             <div className="relative w-full sm:w-auto">
               <button 
                 onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
@@ -205,7 +230,6 @@ export const AdminUsers = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end items-center gap-2">
-                        {/* Block/Unblock Button */}
                         <button 
                           onClick={() => handleToggleBlock(user._id, user.isBlocked, user.role)}
                           disabled={isToggling || user.role === 'admin'}
@@ -218,7 +242,6 @@ export const AdminUsers = () => {
                           {user.isBlocked ? <ShieldCheck className="w-4 h-4" /> : <ShieldAlert className="w-4 h-4" />}
                         </button>
                         
-                        {/* 🚀 View Profile Button */}
                         <button 
                           onClick={() => setSelectedUser(user)}
                           className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded transition-colors"
@@ -242,21 +265,26 @@ export const AdminUsers = () => {
         </motion.div>
       </motion.div>
 
-      {/* 🚀 SLIDE-OVER DRAWER FOR USER PROFILE & ADDRESSES */}
       <AnimatePresence>
         {selectedUser && (
-          <>
+          <div 
+            className="fixed inset-0 z-[100] flex items-center justify-end sm:justify-end"
+            onWheel={(e) => e.stopPropagation()} // 🚀 Stops wheel event
+            onTouchMove={(e) => e.stopPropagation()}
+          >
+            {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setSelectedUser(null)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             />
             
+            {/* Slide Panel */}
             <motion.div 
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[101] shadow-2xl flex flex-col overflow-hidden"
+              className="relative z-10 h-full w-full max-w-md bg-white shadow-2xl flex flex-col border-l border-gray-200"
             >
-              <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50">
+              <div className="shrink-0 flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50">
                 <div className="flex items-center gap-3">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold font-display ${selectedUser.role === 'admin' ? 'bg-black text-white' : 'bg-gray-200 text-gray-800'}`}>
                     {selectedUser.name?.charAt(0).toUpperCase() || "?"}
@@ -273,7 +301,8 @@ export const AdminUsers = () => {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-8">
+              {/* 🚀 Changed to min-h-0 and overscroll-contain */}
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-6 space-y-8">
                 
                 {/* Basic Info */}
                 <div>
@@ -325,7 +354,7 @@ export const AdminUsers = () => {
 
               </div>
             </motion.div>
-          </>
+          </div>
         )}
       </AnimatePresence>
     </>

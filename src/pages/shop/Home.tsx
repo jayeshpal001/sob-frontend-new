@@ -6,13 +6,16 @@ import { FeaturesSection } from "../../components/sections/FeaturesSection";
 import { TestimonialSection } from "../../components/sections/TestimonialSection";
 import { ContactSection } from "../../components/sections/ContactSection";
 import { FeaturedSection } from "../../components/sections/FeaturedSection";
+import { BannerPopup } from "../../components/common/BannerPopup"; 
 
 export const Home = () => {
   return (
     <div className="flex flex-col w-full min-h-screen pt-24 bg-[var(--color-surface)]">
+      <BannerPopup />
+      
       <HeroSection />
       <ProductGrid />
-      <FeaturedSection/>
+      <FeaturedSection />
       <StorySection />
       <FeaturesSection />
       <TestimonialSection />

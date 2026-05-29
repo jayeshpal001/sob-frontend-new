@@ -104,7 +104,7 @@ export const adminApi = baseApi.injectEndpoints({
     }),
 
     // --- REVIEWS ---
-    getAllAdminReviews: builder.query<any, void>({ // Updated to prevent clash
+    getAllAdminReviews: builder.query<any, void>({
       query: () => "/admin/reviews",
       providesTags: ["Reviews"],
     }),
@@ -132,7 +132,7 @@ export const adminApi = baseApi.injectEndpoints({
       invalidatesTags: ["Reviews"],
     }),
 
-    // --- BANNERS ---
+  // --- BANNERS ---
     getBanners: builder.query<any, void>({
       query: () => "/admin/banners",
       providesTags: ["Banners"],
@@ -145,6 +145,16 @@ export const adminApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Banners"],
     }),
+    
+    updateBanner: builder.mutation<any, { id: string; isActive?: boolean; redirectUrl?: string; image?: any }>({
+      query: ({ id, ...patchData }) => ({
+        url: `/admin/banners/${id}`,
+        method: "PUT",
+        body: patchData,
+      }),
+      invalidatesTags: ["Banners"],
+    }),
+
     deleteBanner: builder.mutation<any, string>({
       query: (id) => ({
         url: `/admin/banners/${id}`,
@@ -152,6 +162,43 @@ export const adminApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Banners"],
     }),
+
+    // --- COUPONS ---
+    getCoupons: builder.query<any, void>({
+      query: () => "/admin/coupons",
+      providesTags: ["Coupons"],
+    }),
+    createCoupon: builder.mutation<any, any>({
+      query: (data) => ({
+        url: "/admin/coupons",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Coupons"],
+    }),
+    deleteCoupon: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/admin/coupons/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Coupons"],
+    }),
+    
+    // --- SETTINGS ---
+    getSettings: builder.query<any, void>({
+      query: () => "/admin/settings", 
+      providesTags: ["Settings"] as any,
+    }),
+    updateSettings: builder.mutation<any, any>({
+      query: (data) => ({
+        url: "/admin/settings",
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Settings"] as any,
+    }),
+
+
   }),
   overrideExisting: false,
 });
@@ -178,5 +225,11 @@ export const {
   useDeleteReviewMutation,
   useGetBannersQuery,
   useCreateBannerMutation,
+  useUpdateBannerMutation,
   useDeleteBannerMutation,
+  useGetCouponsQuery,
+  useCreateCouponMutation,
+  useDeleteCouponMutation,
+  useGetSettingsQuery,
+  useUpdateSettingsMutation,
 } = adminApi;

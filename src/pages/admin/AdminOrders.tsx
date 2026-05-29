@@ -1,7 +1,8 @@
 // src/pages/admin/AdminOrders.tsx
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { Search, Eye, Loader2, X, MapPin,  Package } from "lucide-react";
+import { Search, Eye, Loader2, X, MapPin, Package, Ticket } from "lucide-react"; 
 import { toast } from "sonner";
 import { useGetOrdersQuery, useUpdateOrderStatusMutation } from "../../store/api/adminApi"; 
 
@@ -17,6 +18,23 @@ export const AdminOrders = () => {
   const [updateStatus, { isLoading: isUpdating }] = useUpdateOrderStatusMutation();
 
   const orders = Array.isArray(responseData) ? responseData : responseData?.data || [];
+
+  useEffect(() => {
+    if (selectedOrder) {
+      document.body.style.overflow = "hidden";
+      const rootEl = document.getElementById("root");
+      if (rootEl) rootEl.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      const rootEl = document.getElementById("root");
+      if (rootEl) rootEl.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      const rootEl = document.getElementById("root");
+      if (rootEl) rootEl.style.overflow = "";
+    };
+  }, [selectedOrder]);
 
   const container: Variants = {
     hidden: { opacity: 0 },
@@ -54,7 +72,6 @@ export const AdminOrders = () => {
         style: { background: '#111', color: '#fff', borderRadius: '0px', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.1em' }
       });
       
-      // Update selected order locally if the panel is open
       if (selectedOrder && selectedOrder._id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: newStatus.toLowerCase() });
       }
@@ -138,6 +155,13 @@ export const AdminOrders = () => {
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="text-sm font-semibold text-gray-900">₹{order.totalAmount?.toLocaleString() || 0}</span>
+                        
+                        {order.couponCode && (
+                          <span className="text-[10px] text-green-600 font-bold uppercase tracking-widest mt-1 flex items-center gap-1">
+                            <Ticket className="w-3 h-3" /> {order.couponCode}
+                          </span>
+                        )}
+
                         <span className={`text-[10px] uppercase tracking-widest mt-1 font-bold ${getPaymentStatusColor(order.paymentStatus)}`}>
                           {order.paymentStatus || "Pending"} {order.paymentMethod ? `• ${order.paymentMethod}` : ''}
                         </span>
@@ -156,7 +180,7 @@ export const AdminOrders = () => {
                           {statuses.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                         <button 
-                          onClick={() => setSelectedOrder(order)} // 🚀 Open Slide-over Panel
+                          onClick={() => setSelectedOrder(order)} 
                           className="p-2 text-gray-400 hover:text-[#111] hover:bg-gray-100 rounded transition-colors" title="View Order Details"
                         >
                           <Eye className="w-4 h-4" />
@@ -173,21 +197,25 @@ export const AdminOrders = () => {
 
       <AnimatePresence>
         {selectedOrder && (
-          <>
+          <div 
+            className="fixed inset-0 z-[100] flex items-center justify-end sm:justify-end"
+            onWheel={(e) => e.stopPropagation()} 
+            onTouchMove={(e) => e.stopPropagation()}
+          >
             {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setSelectedOrder(null)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             />
             
             {/* Slide Panel */}
             <motion.div 
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[101] shadow-2xl flex flex-col overflow-hidden"
+              className="relative z-10 h-full w-full max-w-md bg-white shadow-2xl flex flex-col border-l border-gray-200"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50">
+              <div className="shrink-0 flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50">
                 <div>
                   <h3 className="font-display text-xl text-gray-900">Order Details</h3>
                   <p className="text-xs font-mono text-gray-500 mt-1">#{selectedOrder._id}</p>
@@ -197,8 +225,7 @@ export const AdminOrders = () => {
                 </button>
               </div>
 
-              {/* Scrollable Content */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-8">
+              <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
                 
                 {/* Status & Payment Block */}
                 <div className="grid grid-cols-2 gap-4">
@@ -262,14 +289,23 @@ export const AdminOrders = () => {
                 <div className="pt-4 border-t border-gray-200 space-y-3">
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Subtotal</span>
-                    <span>₹{selectedOrder.subtotal?.toLocaleString() || selectedOrder.totalAmount?.toLocaleString()}</span>
+                    <span>₹{selectedOrder.subtotal?.toLocaleString() || 0}</span>
                   </div>
+                  
+                  {selectedOrder.couponCode && selectedOrder.discountAmount > 0 && (
+                    <div className="flex justify-between text-sm font-medium text-green-600">
+                      <span>Discount ({selectedOrder.couponCode})</span>
+                      <span>- ₹{selectedOrder.discountAmount?.toLocaleString()}</span>
+                    </div>
+                  )}
+
                   {selectedOrder.tax > 0 && (
                     <div className="flex justify-between text-sm text-gray-600">
                       <span>Tax (Estimated)</span>
                       <span>₹{selectedOrder.tax?.toLocaleString()}</span>
                     </div>
                   )}
+                  
                   <div className="flex justify-between text-base font-bold text-black pt-3 border-t border-gray-100">
                     <span>Total Amount</span>
                     <span>₹{selectedOrder.totalAmount?.toLocaleString() || 0}</span>
@@ -278,7 +314,7 @@ export const AdminOrders = () => {
 
               </div>
             </motion.div>
-          </>
+          </div>
         )}
       </AnimatePresence>
     </>

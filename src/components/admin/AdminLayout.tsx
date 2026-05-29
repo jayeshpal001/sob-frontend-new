@@ -11,9 +11,11 @@ import {
   Users, 
   Star, 
   Image as ImageIcon, 
+  Ticket, 
   LogOut, 
   Menu,
-  Loader2
+  Loader2,
+  Settings 
 } from "lucide-react";
 
 // State Management & API Hooks
@@ -29,6 +31,8 @@ const sidebarLinks = [
   { name: "Users", path: "/admin/users", icon: Users },
   { name: "Reviews", path: "/admin/reviews", icon: Star },
   { name: "Banners", path: "/admin/banners", icon: ImageIcon },
+  { name: "Coupons", path: "/admin/coupons", icon: Ticket }, 
+  { name: "Settings", path: "/admin/settings", icon: Settings }, // <-- New Settings Route
 ];
 
 export const AdminLayout = () => {
@@ -87,7 +91,7 @@ export const AdminLayout = () => {
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex-1 py-8 px-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 py-8 px-4 space-y-2 overflow-y-auto custom-scrollbar">
         <p className="px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-4">Management</p>
         {sidebarLinks.map((link) => {
           const isActive = location.pathname.includes(link.path);

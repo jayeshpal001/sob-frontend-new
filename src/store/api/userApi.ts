@@ -1,187 +1,208 @@
 // src/store/api/userApi.ts
-import { baseApi } from './baseApi';
+import { baseApi } from "./baseApi";
 
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // ==================== UNIVERSAL AUTH ROUTES ====================
     loginUser: builder.mutation<any, any>({
       query: (credentials) => ({
-        url: '/auth/login',
-        method: 'POST',
+        url: "/auth/login",
+        method: "POST",
         body: credentials,
       }),
     }),
     verifyLogin: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/auth/verify-login',
-        method: 'POST',
+        url: "/auth/verify-login",
+        method: "POST",
         body: data,
       }),
     }),
     registerUser: builder.mutation<any, any>({
       query: (userData) => ({
-        url: '/auth/register',
-        method: 'POST',
+        url: "/auth/register",
+        method: "POST",
         body: userData,
       }),
     }),
     verifyRegister: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/auth/verify-register',
-        method: 'POST',
+        url: "/auth/verify-register",
+        method: "POST",
         body: data,
       }),
     }),
     logoutUser: builder.mutation<any, void>({
       query: () => ({
-        url: '/auth/logout',
-        method: 'POST',
+        url: "/auth/logout",
+        method: "POST",
       }),
     }),
 
     // ==================== PROFILE & ADDRESS ROUTES ====================
     getProfile: builder.query<any, void>({
-      query: () => '/user/profile',
-      providesTags: ['UserProfile'],
+      query: () => "/user/profile",
+      providesTags: ["UserProfile"],
     }),
     updateProfile: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/user/profile',
-        method: 'PUT',
+        url: "/user/profile",
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: ['UserProfile'],
+      invalidatesTags: ["UserProfile"],
     }),
     addAddress: builder.mutation<any, any>({
       query: (addressData) => ({
-        url: '/user/profile/address',
-        method: 'POST',
+        url: "/user/profile/address",
+        method: "POST",
         body: addressData,
       }),
-      invalidatesTags: ['UserProfile'],
+      invalidatesTags: ["UserProfile"],
     }),
     updateAddress: builder.mutation<any, { index: number; data: any }>({
       query: ({ index, data }) => ({
         url: `/user/profile/address/${index}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: ['UserProfile'],
+      invalidatesTags: ["UserProfile"],
     }),
     deleteAddress: builder.mutation<any, number>({
       query: (index) => ({
         url: `/user/profile/address/${index}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['UserProfile'],
+      invalidatesTags: ["UserProfile"],
     }),
     setDefaultAddress: builder.mutation<any, number>({
       query: (index) => ({
         url: `/user/profile/address/default/${index}`,
-        method: 'PUT',
+        method: "PUT",
       }),
-      invalidatesTags: ['UserProfile'],
+      invalidatesTags: ["UserProfile"],
     }),
     getDefaultAddress: builder.query<any, void>({
-      query: () => '/user/profile/address/default/get/current',
-      providesTags: ['UserProfile'],
+      query: () => "/user/profile/address/default/get/current",
+      providesTags: ["UserProfile"],
     }),
     checkHasAddress: builder.query<any, void>({
-      query: () => '/user/profile/address/check/exists',
+      query: () => "/user/profile/address/check/exists",
     }),
 
     // ==================== PRODUCT ROUTES ====================
     getAllProducts: builder.query<any, string | void>({
       query: (queryString = "") => `/user/products/browse${queryString}`,
-      providesTags: ['UserProducts'],
+      providesTags: ["UserProducts"],
     }),
     getProductById: builder.query<any, string>({
       query: (id) => `/user/products/${id}`,
-      providesTags: ['UserProducts'],
+      providesTags: ["UserProducts"],
     }),
 
     // ==================== CART ROUTES ====================
     getCart: builder.query<any, void>({
-      query: () => '/user/cart',
-      providesTags: ['Cart'],
+      query: () => "/user/cart",
+      providesTags: ["Cart"],
     }),
     addToCartApi: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/user/cart',
-        method: 'POST',
+        url: "/user/cart",
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: ['Cart'],
+      invalidatesTags: ["Cart"],
     }),
     updateCartApi: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/user/cart',
-        method: 'PUT',
+        url: "/user/cart",
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: ['Cart'],
+      invalidatesTags: ["Cart"],
     }),
     removeItemFromCartApi: builder.mutation<any, string>({
       query: (productId) => ({
         url: `/user/cart/${productId}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['Cart'],
+      invalidatesTags: ["Cart"],
     }),
 
     // ==================== ORDER & PAYMENT (RAZORPAY) ====================
     checkoutOrder: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/user/orders/checkout',
-        method: 'POST',
+        url: "/user/orders/checkout",
+        method: "POST",
         body: data,
       }),
     }),
     verifyPayment: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/user/orders/verify-payment',
-        method: 'POST',
+        url: "/user/orders/verify-payment",
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: ['UserOrders', 'Cart'], 
+      invalidatesTags: ["UserOrders", "Cart"],
     }),
     getMyOrders: builder.query<any, void>({
-      query: () => '/user/orders/my-orders',
-      providesTags: ['UserOrders'],
+      query: () => "/user/orders/my-orders",
+      providesTags: ["UserOrders"],
     }),
     getOrderDetails: builder.query<any, string>({
       query: (id) => `/user/orders/${id}`,
-      providesTags: ['UserOrders'],
+      providesTags: ["UserOrders"],
     }),
     cancelOrder: builder.mutation<any, string>({
       query: (id) => ({
         url: `/user/orders/cancel/${id}`,
-        method: 'PUT',
+        method: "PUT",
       }),
-      invalidatesTags: ['UserOrders'],
+      invalidatesTags: ["UserOrders"],
     }),
 
     // ==================== REVIEWS ====================
     getReviews: builder.query<any, string>({
       query: (productId) => `/user/reviews/${productId}`,
-      providesTags: ['Reviews'],
+      providesTags: ["Reviews"],
     }),
     addReview: builder.mutation<any, { productId: string; data: any }>({
       query: ({ productId, data }) => ({
         url: `/user/reviews/${productId}`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: ['Reviews', 'UserProducts'], 
+      invalidatesTags: ["Reviews", "UserProducts"],
     }),
 
-    // --- CONTACT ROUTE ---
+    // ==================== CONTACT ROUTE ====================
     submitContactForm: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/user/contact', 
-        method: 'POST',
+        url: "/user/contact",
+        method: "POST",
         body: data,
       }),
+    }),
+
+    // ==================== COUPONS ====================
+    applyCoupon: builder.mutation<any, any>({
+      query: (data) => ({
+        url: "/user/coupons/apply",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // ==================== BANNER ROUTES ====================
+    getActiveBanner: builder.query<any, void>({
+      query: () => "/user/banners/active",
+      providesTags: ["Banners"] as any, // Optional: if you have Banners tag
+    }),
+
+    // ==================== GLOBAL SETTINGS (Tax & Delivery) ====================
+    getUserSettings: builder.query<any, void>({
+      query: () => "/settings", // Yeh wahi same backend route hai
+      providesTags: ["Settings"] as any,
     }),
   }),
   overrideExisting: false,
@@ -204,17 +225,17 @@ export const {
   useSetDefaultAddressMutation,
   useGetDefaultAddressQuery,
   useCheckHasAddressQuery,
-  
+
   // Products
   useGetAllProductsQuery,
   useGetProductByIdQuery,
-  
+
   // Cart
   useGetCartQuery,
   useAddToCartApiMutation,
   useUpdateCartApiMutation,
   useRemoveItemFromCartApiMutation,
-  
+
   // Orders & Payment
   useCheckoutOrderMutation,
   useVerifyPaymentMutation,
@@ -226,4 +247,12 @@ export const {
   useGetReviewsQuery,
   useAddReviewMutation,
   useSubmitContactFormMutation,
+
+  // Coupons
+  useApplyCouponMutation,
+
+  // Banners
+  useGetActiveBannerQuery,
+  // Settings
+  useGetUserSettingsQuery,
 } = userApi;

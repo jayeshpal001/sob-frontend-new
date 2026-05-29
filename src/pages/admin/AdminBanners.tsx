@@ -1,18 +1,25 @@
 // src/pages/admin/AdminBanners.tsx
 import { useState } from "react";
 import { motion, type Variants } from "framer-motion";
-import { UploadCloud, Trash2, Link as LinkIcon, Plus, X, Loader2, Image as ImageIcon } from "lucide-react";
+import { UploadCloud, Trash2, Link as LinkIcon, Plus, X, Loader2, Image as ImageIcon, Power } from "lucide-react";
 import { toast } from "sonner";
-import { useGetBannersQuery, useCreateBannerMutation, useDeleteBannerMutation } from "../../store/api/adminApi";
+import { 
+  useGetBannersQuery, 
+  useCreateBannerMutation, 
+  useDeleteBannerMutation,
+  useUpdateBannerMutation 
+} from "../../store/api/adminApi";
 
 export const AdminBanners = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  
   const { data: response, isLoading } = useGetBannersQuery();
   const [createBanner, { isLoading: isCreating }] = useCreateBannerMutation();
   const [deleteBanner] = useDeleteBannerMutation();
+  const [updateBanner, { isLoading: isUpdating }] = useUpdateBannerMutation();
 
   const banners = response?.data || [];
 
@@ -55,11 +62,25 @@ export const AdminBanners = () => {
     }
   };
 
+  //  New Function: Handle Banner Active/Inactive Toggle
+  const handleToggleActive = async (id: string, currentStatus: boolean) => {
+    try {
+      await updateBanner({ id, isActive: !currentStatus }).unwrap();
+      toast.success(`Banner is now ${!currentStatus ? 'Live' : 'Inactive'}`, {
+        style: { background: '#111', color: '#fff', borderRadius: '0px', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.1em' }
+      });
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to update banner status.");
+    }
+  };
+
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this banner?")) return;
+    if (!window.confirm("Are you sure you want to delete this banner?")) return;
     try {
       await deleteBanner(id).unwrap();
-      toast.success("Banner removed.");
+      toast.success("Banner removed permanently.", {
+        style: { background: '#111', color: '#fff', borderRadius: '0px', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.1em' }
+      });
     } catch (error: any) {
       toast.error("Failed to delete banner.");
     }
@@ -114,7 +135,7 @@ export const AdminBanners = () => {
                 {preview ? (
                   <div className="relative aspect-[21/9] w-full bg-gray-100 border border-gray-200 overflow-hidden">
                     <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-                    <button onClick={() => { setPreview(null); setSelectedFile(null); }} className="absolute inset-0 bg-black/40 text-white opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-[10px] font-bold uppercase tracking-widest">Change Image</button>
+                    <button type="button" onClick={() => { setPreview(null); setSelectedFile(null); }} className="absolute inset-0 bg-black/40 text-white opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-[10px] font-bold uppercase tracking-widest">Change Image</button>
                   </div>
                 ) : (
                   <label className="flex flex-col items-center justify-center w-full aspect-[21/9] bg-gray-50 border-2 border-dashed border-gray-200 hover:border-gray-400 cursor-pointer transition-all">
@@ -154,33 +175,56 @@ export const AdminBanners = () => {
       {/* Banner Gallery */}
       <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {banners.map((banner: any) => (
-          <div key={banner._id} className="group bg-white border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+          <div key={banner._id} className="group bg-white border border-gray-200 shadow-sm overflow-hidden flex flex-col transition-all duration-300 hover:border-gray-400">
             <div className="aspect-[21/9] bg-gray-100 relative overflow-hidden">
               <img 
                 src={banner.image.startsWith('http') ? banner.image : `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/uploads/${banner.image}`} 
                 alt="Banner" 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${!banner.isActive ? 'grayscale opacity-70' : ''}`} 
               />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
                 <button 
                   onClick={() => handleDelete(banner._id)}
+                  title="Delete Banner"
                   className="p-4 bg-white text-red-600 hover:bg-red-600 hover:text-white transition-all rounded-full shadow-xl"
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
               </div>
             </div>
-            <div className="p-6 flex justify-between items-center bg-white border-t border-gray-50">
-              <div className="flex flex-col gap-1">
+            
+            <div className="p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border-t border-gray-50">
+              <div className="flex flex-col gap-1 w-full sm:w-auto">
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Redirects To</span>
-                <span className="text-xs font-medium text-gray-900 truncate max-w-[200px]">{banner.redirectUrl}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${banner.isActive ? 'bg-green-500' : 'bg-gray-300'}`} />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                  {banner.isActive ? 'Live' : 'Inactive'}
+                <span className="text-xs font-medium text-gray-900 truncate max-w-[200px] block" title={banner.redirectUrl}>
+                  {banner.redirectUrl || "No Link"}
                 </span>
               </div>
+              
+              {/* Active/Inactive Toggle Button */}
+              <button 
+                onClick={() => handleToggleActive(banner._id, banner.isActive)}
+                disabled={isUpdating}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${
+                  banner.isActive 
+                    ? 'border-green-200 bg-green-50 hover:bg-green-100' 
+                    : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                } disabled:opacity-50`}
+                title="Toggle Active Status"
+              >
+                {banner.isActive ? (
+                  <>
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-green-700">Live</span>
+                  </>
+                ) : (
+                  <>
+                    <Power className="w-3 h-3 text-gray-400" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Inactive</span>
+                  </>
+                )}
+              </button>
+
             </div>
           </div>
         ))}
@@ -188,7 +232,7 @@ export const AdminBanners = () => {
         {banners.length === 0 && !isLoading && (
           <div className="col-span-full py-20 bg-gray-50 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
             <ImageIcon className="w-12 h-12 text-gray-200 mb-4" />
-            <p className="text-sm text-gray-400 uppercase tracking-widest font-bold">No active banners.</p>
+            <p className="text-sm text-gray-400 uppercase tracking-widest font-bold">No banners uploaded yet.</p>
           </div>
         )}
       </motion.div>

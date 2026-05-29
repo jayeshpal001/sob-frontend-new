@@ -9,6 +9,7 @@ import { SplashScreen } from "./components/common/SplashScreen";
 import { PageLoader } from "./components/common/PageLoader";
 import { AdminProtectedRoute } from "./components/admin/AdminProtectedRoute";
 
+
 // Customer Pages
 const Home = lazy(() => import("./pages/shop/Home").then((m) => ({ default: m.Home })));
 const Collection = lazy(() => import("./pages/shop/Collection").then((m) => ({ default: m.Collection })));
@@ -31,7 +32,8 @@ const AdminCategories = lazy(() => import("./pages/admin/AdminCategories").then(
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers").then((m) => ({ default: m.AdminUsers })));
 const AdminReviews = lazy(() => import("./pages/admin/AdminReviews").then((m) => ({ default: m.AdminReviews })));
 const AdminBanners = lazy(() => import("./pages/admin/AdminBanners").then((m) => ({ default: m.AdminBanners })));
-
+const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons").then((m) => ({ default: m.AdminCoupons })));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings").then((m) => ({ default: m.AdminSettings })));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin").then((m) => ({ default: m.AdminLogin })));
 
 function App() {
@@ -92,6 +94,8 @@ function App() {
               <Route path="users" element={<AdminUsers />} />
               <Route path="reviews" element={<AdminReviews />} />
               <Route path="banners" element={<AdminBanners />} />
+              <Route path="coupons" element={<AdminCoupons />} />
+              <Route path="settings" element={<AdminSettings />} />
             </Route>
           </Route>
 

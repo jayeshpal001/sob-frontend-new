@@ -1,6 +1,6 @@
 // src/components/common/CartDrawer.tsx
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Minus, Plus, Trash2, Loader2 } from "lucide-react";
+import { X, Minus, Plus, Trash2, Loader2, Truck } from "lucide-react"; 
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -15,7 +15,8 @@ import { Button } from "../ui/Button";
 import { 
   useGetCartQuery, 
   useUpdateCartApiMutation, 
-  useRemoveItemFromCartApiMutation 
+  useRemoveItemFromCartApiMutation,
+  useGetUserSettingsQuery // Global Settings Hook Imported
 } from "../../store/api/userApi";
 
 export const CartDrawer = () => {
@@ -31,11 +32,14 @@ export const CartDrawer = () => {
     skip: !isAuthenticated, 
   });
   
+  // Fetch Dynamic Settings (Tax & Delivery) from Admin Configuration
+  const { data: settingsResponse } = useGetUserSettingsQuery();
+  const settings = settingsResponse?.data || { taxPercentage: 18, deliveryCharge: 100, freeDeliveryThreshold: 1500 };
+  
   const [updateCartDb] = useUpdateCartApiMutation();
   const [removeCartItemDb] = useRemoveItemFromCartApiMutation();
 
   // Smart Data Normalization
-  // DB send raw object, so we handle it securely
   const rawDbCart = dbCartResponse?.data || dbCartResponse || {};
   const rawDbItems = rawDbCart.items || [];
   
@@ -60,27 +64,27 @@ export const CartDrawer = () => {
       })
     : reduxItems;
 
-  // SMART BILLING EXTRACTION
-  // Use DB values if logged in, otherwise fallback to manual calculation for guests
-  const subtotal = isAuthenticated && rawDbCart.subtotal !== undefined 
-    ? rawDbCart.subtotal 
-    : cartItems.reduce((total: number, item: any) => total + item.price * item.quantity, 0);
+  // SMART DYNAMIC BILLING
+  // Subtotal calculation
+  const subtotal = cartItems.reduce((total: number, item: any) => total + item.price * item.quantity, 0);
 
-  // Default guest tax calculation (assuming 10% based on your backend response 150 for 1500)
-  const tax = isAuthenticated && rawDbCart.tax !== undefined 
-    ? rawDbCart.tax 
-    : subtotal * 0.10;
+  // Dynamic Tax Calculation
+  const tax = (subtotal * settings.taxPercentage) / 100;
 
-  const total = isAuthenticated && rawDbCart.total !== undefined 
-    ? rawDbCart.total 
-    : subtotal + tax;
+  // Dynamic Delivery Logic
+  const isFreeDelivery = subtotal >= settings.freeDeliveryThreshold;
+  const deliveryFee = isFreeDelivery ? 0 : settings.deliveryCharge;
+  const amountNeededForFreeDelivery = settings.freeDeliveryThreshold - subtotal;
+
+  // Final Total including Tax & Delivery
+  const total = subtotal + tax + deliveryFee;
 
   // Handlers for API + Redux Sync
   const handleUpdateQuantity = async (productId: string, currentQuantity: number, change: number, stockLimit: number) => {
     const newQuantity = currentQuantity + change;
     if (newQuantity < 1) return;
 
-    //  STOCK VALIDATION
+    // STOCK VALIDATION
     if (change > 0 && newQuantity > stockLimit) {
       toast.error("STOCK LIMIT REACHED", {
         description: `Only ${stockLimit} units available.`,
@@ -158,7 +162,7 @@ export const CartDrawer = () => {
             </div>
 
             {/* Cart Items */}
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 custom-scrollbar">
               {cartItems.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
                   <p className="font-sans text-sm uppercase tracking-widest">
@@ -181,7 +185,7 @@ export const CartDrawer = () => {
                           {item.name}
                         </h3>
                         <p className="text-gray-500 text-xs mt-1 font-sans">
-                          {item.quantity} x ₹{item.price}
+                          {item.quantity} x ₹{item.price.toLocaleString()}
                         </p>
                       </div>
 
@@ -201,7 +205,7 @@ export const CartDrawer = () => {
                           <button
                             onClick={() => handleUpdateQuantity(item._id, item.quantity, 1, item.stock)}
                             className="hover:text-gray-600 transition-colors disabled:opacity-50"
-                            disabled={item.quantity >= item.stock} // Automatically disable if max stock reached
+                            disabled={item.quantity >= item.stock} 
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -220,23 +224,46 @@ export const CartDrawer = () => {
               )}
             </div>
 
-            {/*  Footer / Checkout with Detailed Billing */}
+            {/*  Footer / Checkout with Detailed Dynamic Billing */}
             {cartItems.length > 0 && (
               <div className="p-6 border-t border-gray-100 bg-white">
                 
                 {/* Billing Details */}
                 <div className="space-y-3 mb-6 font-sans">
+                  
                   <div className="flex justify-between items-center text-sm text-gray-500">
                     <span>Subtotal</span>
                     <span>₹{subtotal.toLocaleString()}</span>
                   </div>
+                  
+                  {/* Dynamic Tax Display */}
                   <div className="flex justify-between items-center text-sm text-gray-500">
-                    <span>Estimated Tax</span>
-                    <span>₹{tax.toLocaleString()}</span>
+                    <span>Tax ({settings.taxPercentage}%)</span>
+                    <span>₹{Math.round(tax).toLocaleString()}</span>
                   </div>
+
+                  {/* Dynamic Delivery Display */}
+                  <div className="flex justify-between items-center text-sm text-gray-500">
+                    <span className="flex items-center gap-2"><Truck className="w-4 h-4" /> Delivery</span>
+                    <span>
+                      {isFreeDelivery ? (
+                        <span className="text-[10px] bg-green-50 text-green-600 font-bold uppercase tracking-widest px-2 py-1 border border-green-200">Free</span>
+                      ) : (
+                        `₹${deliveryFee.toLocaleString()}`
+                      )}
+                    </span>
+                  </div>
+
+                  {/*  Upsell Message if they haven't reached Free Delivery */}
+                  {!isFreeDelivery && (
+                    <p className="text-[10px] text-gray-400 text-right mt-1 italic">
+                      Add items worth ₹{amountNeededForFreeDelivery.toLocaleString()} more for free delivery
+                    </p>
+                  )}
+
                   <div className="flex justify-between items-center text-base font-bold text-gray-900 border-t border-gray-100 pt-3 mt-3">
                     <span className="uppercase tracking-widest text-xs">Total</span>
-                    <span>₹{total.toLocaleString()}</span>
+                    <span>₹{Math.round(total).toLocaleString()}</span>
                   </div>
                 </div>
 
