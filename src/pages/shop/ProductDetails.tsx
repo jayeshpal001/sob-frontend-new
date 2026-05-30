@@ -14,7 +14,7 @@ import { ProductReviews } from "../../components/product/ProductReviews";
 import { 
   useGetProductByIdQuery, 
   useGetReviewsQuery,
-  useAddToCartApiMutation // Added Add to Cart API mutation
+  useAddToCartApiMutation 
 } from "../../store/api/userApi";
 
 export const ProductDetails = () => {
@@ -73,8 +73,7 @@ export const ProductDetails = () => {
       }
 
       // 2. Sync with local Redux state for instant UI update
-      // Assuming your slice uses the product payload
-      dispatch(addToCart(product));
+      dispatch(addToCart({ ...product, quantity }));
       
       toast.success(`${quantity}x ${product.name} Added to Cart`, {
         style: { background: '#111', color: '#fff', borderRadius: '0px', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px' }
@@ -219,7 +218,6 @@ export const ProductDetails = () => {
               {/* Price & Discount Logic */}
               <div className="mb-5 mt-4">
                 <span className="text-2xl font-medium text-gray-900">₹{product.price.toLocaleString()}</span>
-                {/* Mock Original Price for premium retail feel */}
                 <div className="text-sm text-gray-500 mt-1 flex items-center gap-2">
                   <span>Was <span className="line-through">₹{(product.price * 1.5).toLocaleString()}</span></span>
                   <span className="text-red-700 font-medium">(33% off)</span>
@@ -311,14 +309,19 @@ export const ProductDetails = () => {
                 <div className="flex items-center border border-gray-300 h-14 w-full sm:w-32">
                   <button 
                     onClick={() => setQuantity(Math.max(1, quantity - 1))} 
-                    className="flex-1 flex justify-center text-gray-500 hover:text-black transition-colors"
+                    disabled={quantity <= 1}
+                    className="flex-1 flex justify-center text-gray-500 hover:text-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
+                  
                   <span className="flex-1 text-center font-medium text-sm text-gray-900">{quantity}</span>
+                  
+                  {/* Plus button capped at product stock */}
                   <button 
-                    onClick={() => setQuantity(quantity + 1)} 
-                    className="flex-1 flex justify-center text-gray-500 hover:text-black transition-colors"
+                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} 
+                    disabled={quantity >= product.stock}
+                    className="flex-1 flex justify-center text-gray-500 hover:text-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-gray-500"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
