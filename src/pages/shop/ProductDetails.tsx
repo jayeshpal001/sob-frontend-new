@@ -4,23 +4,33 @@ import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Plus, Minus, Star, Loader2, Heart, Leaf, Droplet, Sparkles, Wind } from "lucide-react";
 import { toast } from "sonner";
-import { useAppDispatch } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { addToCart } from "../../store/slices/cartSlice";
 
 // Component Imports
 import { ProductReviews } from "../../components/product/ProductReviews";
 
 // API Hooks Import
-import { useGetProductByIdQuery, useGetReviewsQuery } from "../../store/api/userApi";
+import { 
+  useGetProductByIdQuery, 
+  useGetReviewsQuery,
+  useAddToCartApiMutation // Added Add to Cart API mutation
+} from "../../store/api/userApi";
 
 export const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
   
+  // Auth State
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  
   // States
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
+
+  // Backend API Mutation
+  const [addToCartDb, { isLoading: isAddingToCart }] = useAddToCartApiMutation();
 
   // Scroll to Top
   useEffect(() => {
@@ -51,6 +61,33 @@ export const ProductDetails = () => {
       }
     }
   }, [product]);
+
+  // Handle Add to Cart Logic
+  const handleAddToCart = async () => {
+    if (isAddingToCart || product.stock === 0) return;
+
+    try {
+      // 1. Sync with Database if Logged In
+      if (isAuthenticated) {
+        await addToCartDb({ productId: product._id, quantity: quantity }).unwrap();
+      }
+
+      // 2. Sync with local Redux state for instant UI update
+      // Assuming your slice uses the product payload
+      dispatch(addToCart(product));
+      
+      toast.success(`${quantity}x ${product.name} Added to Cart`, {
+        style: { background: '#111', color: '#fff', borderRadius: '0px', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px' }
+      });
+      
+    } catch (error) {
+      console.error("Failed to add to DB Cart:", error);
+      toast.error("FAILED TO ADD ITEM", {
+        description: "Something went wrong while syncing your cart.",
+        style: { background: '#FFF0F0', color: '#D92D20', border: '1px solid #FDA29B', borderRadius: '0px', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px', fontWeight: 'bold' }
+      });
+    }
+  };
 
   if (isProductLoading) {
     return (
@@ -289,17 +326,16 @@ export const ProductDetails = () => {
 
                 {/* Primary Add to Cart */}
                 <button 
-                  disabled={product.stock === 0}
-                  onClick={() => {
-                    // Pass product to Redux. (If slice supports quantity, add it here)
-                    dispatch(addToCart(product));
-                    toast.success(`${quantity}x ${product.name} Added to Cart`, {
-                      style: { background: '#111', color: '#fff', borderRadius: '0px' }
-                    });
-                  }}
+                  disabled={product.stock === 0 || isAddingToCart}
+                  onClick={handleAddToCart}
                   className="flex-1 h-14 bg-black text-white text-[13px] font-bold tracking-[0.15em] uppercase hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 w-full"
                 >
-                  {product.stock === 0 ? "OUT OF STOCK" : `ADD TO CART — ₹${(product.price * quantity).toLocaleString()}`}
+                  {isAddingToCart && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {product.stock === 0 
+                    ? "OUT OF STOCK" 
+                    : isAddingToCart 
+                      ? "ADDING..." 
+                      : `ADD TO CART — ₹${(product.price * quantity).toLocaleString()}`}
                 </button>
 
                 {/* Wishlist Icon */}
