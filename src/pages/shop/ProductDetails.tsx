@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react"; 
 import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Plus, Minus, Star, Loader2, Heart, Leaf, Droplet, Sparkles, Wind } from "lucide-react";
+import { ArrowLeft, Plus, Minus, Star, Loader2, Leaf, Droplet, Sparkles, Wind } from "lucide-react";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { addToCart } from "../../store/slices/cartSlice";
@@ -341,10 +341,6 @@ export const ProductDetails = () => {
                       : `ADD TO CART — ₹${(product.price * quantity).toLocaleString()}`}
                 </button>
 
-                {/* Wishlist Icon */}
-                <button className="h-14 w-14 flex items-center justify-center border border-gray-300 hover:border-black text-gray-500 hover:text-black transition-colors shrink-0">
-                  <Heart className="w-5 h-5" />
-                </button>
 
               </div>
 
