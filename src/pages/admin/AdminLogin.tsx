@@ -118,7 +118,7 @@ export const AdminLogin = () => {
         <div className="absolute top-0 left-0 w-full h-1 bg-[#111]" />
 
         <div className="text-center mb-10">
-          <img src="/sob-logo.jpg" alt="SOB" className="h-10 mx-auto mb-6 object-contain" />
+          <img src="/sob-logo.png" alt="SOB" className="h-10 mx-auto mb-6 object-contain" />
           <h1 className="text-2xl font-display text-gray-900 tracking-tight">Admin Portal</h1>
           <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mt-2">
             {step === 1 ? "Authorized Personnel Only" : "Security Verification"}
