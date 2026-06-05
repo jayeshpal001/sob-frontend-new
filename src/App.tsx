@@ -1,6 +1,6 @@
 // src/App.tsx
 import { useEffect, useRef, lazy, Suspense } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom"; // 🚀 useLocation import kiya
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Lenis from "@studio-freight/lenis";
 import { Toaster } from "sonner"; 
 import { MainLayout } from "./components/common/MainLayout";
@@ -8,7 +8,6 @@ import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import { SplashScreen } from "./components/common/SplashScreen";
 import { PageLoader } from "./components/common/PageLoader";
 import { AdminProtectedRoute } from "./components/admin/AdminProtectedRoute";
-
 
 // Customer Pages
 const Home = lazy(() => import("./pages/shop/Home").then((m) => ({ default: m.Home })));
@@ -20,6 +19,7 @@ const Checkout = lazy(() => import("./pages/shop/Checkout").then((m) => ({ defau
 const Profile = lazy(() => import("./pages/shop/Profile").then((m) => ({ default: m.Profile })));
 const NotFound = lazy(() => import("./pages/shop/NotFound").then((m) => ({ default: m.NotFound })));
 const Contact = lazy(() => import("./pages/shop/Contact").then((m) => ({ default: m.Contact })));
+const BuildYourBox = lazy(() => import("./pages/shop/BuildYourBox").then((m) => ({ default: m.BuildYourBox })));
 
 // Admin Pages
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
@@ -110,6 +110,8 @@ function App() {
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/build-your-own-box" element={<BuildYourBox />} />
+
             {/* Customer Protected Route */}
             <Route element={<ProtectedRoute />}>
               <Route path="/checkout" element={<Checkout />} />

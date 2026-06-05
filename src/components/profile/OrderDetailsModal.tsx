@@ -9,6 +9,7 @@ import {
   Check,
   XCircle,
   Ticket,
+  Package,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useGetOrderDetailsQuery } from "../../store/api/userApi";
@@ -52,7 +53,8 @@ export const OrderDetailsModal = ({
   const currentStepIndex = order ? trackingSteps.indexOf(order.status) : 0;
   const isCancelled = order?.status === "cancelled";
 
-  const handleProductClick = (productId: string) => {
+  const handleProductClick = (productId: string | null) => {
+    if (!productId) return; // Safety check if bundle has no product ID
     onClose();
     navigate(`/product/${productId}`);
   };
@@ -91,7 +93,7 @@ export const OrderDetailsModal = ({
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="relative z-10 w-full max-w-2xl bg-white shadow-2xl flex flex-col border border-gray-200"
-            style={{ maxHeight: "85vh" }} 
+            style={{ maxHeight: "85vh" }}
           >
             {/* Header */}
             <div className="shrink-0 flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50">
@@ -102,6 +104,15 @@ export const OrderDetailsModal = ({
                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">
                   ID: {orderId.toUpperCase()}
                 </p>
+                {order?.createdAt && (
+                  <p className="text-[10px] font-medium text-gray-400 mt-0.5 uppercase tracking-widest">
+                    Placed on:{" "}
+                    {new Date(order.createdAt).toLocaleString("en-IN", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </p>
+                )}
               </div>
               <button
                 onClick={onClose}
@@ -182,39 +193,102 @@ export const OrderDetailsModal = ({
 
                   {/* Items List */}
                   <div>
-                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4 border-b border-gray-100 pb-2">
-                      Purchased Items
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
+                      <Package className="w-3 h-3" /> Purchased Items
                     </h3>
                     <div className="space-y-4">
-                      {order.products.map((item: any) => (
+                      {order.products.map((item: any, idx: number) => (
                         <div
-                          key={item._id}
+                          key={item._id || idx}
                           className="flex items-center justify-between"
                         >
                           <div
-                            className="flex items-center gap-4 cursor-pointer group"
+                            className={`flex items-start gap-4 ${!item.isBundle ? "cursor-pointer group" : ""}`}
                             onClick={() =>
-                              handleProductClick(item.productId._id)
+                              !item.isBundle &&
+                              handleProductClick(item.productId?._id)
                             }
                           >
-                            <div className="w-12 h-16 bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0 group-hover:border-black transition-colors">
+                            <div className="w-16 h-20 bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0 group-hover:border-black transition-colors relative overflow-hidden">
                               <img
-                                src={getImageUrl(item.productId.images)}
+                                src={
+                                  item.isBundle
+                                    ? item.image ||
+                                      item.bundleContents?.[0]?.image ||
+                                      "/placeholder-image.png"
+                                    : getImageUrl(item.productId?.images)
+                                }
                                 alt="Product"
-                                className="w-full h-full object-contain p-1"
+                                className="w-full h-full object-contain p-2"
+                                onError={(e) => {
+                                  e.currentTarget.src =
+                                    "/placeholder-image.png";
+                                }}
                               />
                             </div>
-                            <div>
-                              <p className="font-display text-sm text-gray-900 group-hover:underline">
-                                {item.productId.name}
+                            <div className="flex flex-col py-1">
+                              {/* Smart Check for Bundle Name */}
+                              <p className="font-display text-sm text-gray-900 flex items-center gap-2">
+                                {item.isBundle
+                                  ? item.name || "Custom Discovery Box"
+                                  : item.productId?.name || "Unknown Product"}
+                                {item.isBundle && (
+                                  <Package className="w-3 h-3 text-gray-400" />
+                                )}
                               </p>
                               <p className="text-xs text-gray-500 mt-0.5">
                                 Qty: {item.quantity} × ₹
                                 {item.price.toLocaleString()}
                               </p>
+
+                              {/* PREMIUM THUMBNAIL UI FOR ORDER DETAILS */}
+                              {item.isBundle &&
+                                item.bundleContents &&
+                                item.bundleContents.length > 0 && (
+                                  <div className="mt-3 flex flex-wrap gap-2 pl-2 border-l-2 border-gray-100">
+                                    {item.bundleContents.map(
+                                      (content: any, i: number) => {
+                                        // Smart Fallback Avatar API
+                                        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(content.name)}&background=f9fafb&color=000&size=64&font-size=0.4`;
+
+                                        // Format URL securely
+                                        const imgUrl = content.image
+                                          ? content.image.startsWith("http")
+                                            ? content.image
+                                            : `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/uploads/${content.image}`
+                                          : avatarUrl;
+
+                                        return (
+                                          <div
+                                            key={i}
+                                            className="flex items-center gap-2 bg-gray-50 border border-gray-200 p-1 pr-3 rounded-full shrink-0 mb-1"
+                                          >
+                                            <div className="w-6 h-6 rounded-full bg-white border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+                                              <img
+                                                src={imgUrl}
+                                                alt={content.name}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                  e.currentTarget.src =
+                                                    avatarUrl;
+                                                }}
+                                              />
+                                            </div>
+                                            <span className="text-[10px] text-gray-600 font-medium">
+                                              {content.name}{" "}
+                                              <span className="font-bold text-black ml-1">
+                                                (x{content.quantity})
+                                              </span>
+                                            </span>
+                                          </div>
+                                        );
+                                      },
+                                    )}
+                                  </div>
+                                )}
                             </div>
                           </div>
-                          <p className="font-sans font-medium text-sm text-gray-900">
+                          <p className="font-sans font-medium text-sm text-gray-900 self-start mt-1">
                             ₹{(item.price * item.quantity).toLocaleString()}
                           </p>
                         </div>
@@ -229,19 +303,25 @@ export const OrderDetailsModal = ({
                       <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-2">
                         <Truck className="w-3 h-3" /> Delivery Details
                       </h3>
-                      <p className="font-sans text-xs text-gray-700 leading-relaxed">
-                        <span className="font-bold text-gray-900 block mb-1">
-                          {order.address?.name}
-                        </span>
-                        {order.address?.addressLine}
-                        <br />
-                        {order.address?.city}, {order.address?.state} -{" "}
-                        {order.address?.pincode}
-                        <br />
-                        <span className="block mt-2 font-mono text-gray-500">
-                          PH: {order.address?.phone}
-                        </span>
-                      </p>
+                      {order.address ? (
+                        <p className="font-sans text-xs text-gray-700 leading-relaxed">
+                          <span className="font-bold text-gray-900 block mb-1">
+                            {order.address.name}
+                          </span>
+                          {order.address.addressLine}
+                          <br />
+                          {order.address.city}, {order.address.state} -{" "}
+                          {order.address.pincode}
+                          <br />
+                          <span className="block mt-2 font-mono text-gray-500">
+                            PH: {order.address.phone}
+                          </span>
+                        </p>
+                      ) : (
+                        <p className="text-xs text-gray-500 italic">
+                          No delivery address recorded.
+                        </p>
+                      )}
                     </div>
 
                     {/* Billing Summary */}
@@ -275,7 +355,7 @@ export const OrderDetailsModal = ({
                         <div className="flex justify-between text-gray-500">
                           <span>Delivery Fee</span>
                           <span>
-                            {order.deliveryFee === 0 ? (
+                            {order.deliveryFee === 0 || !order.deliveryFee ? (
                               <span className="text-[10px] bg-green-50 text-green-600 font-bold uppercase tracking-widest px-2 py-1 border border-green-200">
                                 Free
                               </span>

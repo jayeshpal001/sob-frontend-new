@@ -10,9 +10,10 @@ import { useAddToCartApiMutation } from "../../store/api/userApi";
 interface ProductCardProps {
   product: Product | any; 
   index?: number;
+  customFooter?: React.ReactNode; // Added support for custom actions
 }
 
-export const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
+export const ProductCard = ({ product, index = 0, customFooter }: ProductCardProps) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   
@@ -24,24 +25,20 @@ export const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
     if (product.images && product.images.length > 0) {
       return product.images[0].url || product.images[0];
     }
-    return product.image || "/placeholder-image.png"; // Fallback
+    return product.image || "/placeholder-image.png"; 
   };
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation(); 
     e.preventDefault();
     
-    // Prevent multiple clicks while API is processing
     if (isLoading) return;
     
     try {
-      // 1. If Logged In: Sync with MongoDB Cart
       if (isAuthenticated) {
-        // Assuming your backend expects { productId, quantity }
         await addToCartDb({ productId: product._id, quantity: 1 }).unwrap();
       }
 
-      // 2. Always update local Redux state for instant snappy UI feedback
       dispatch(addToCart(product));
       
       toast.success(`${product.name} Added to Cart`, {
@@ -59,7 +56,7 @@ export const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
 
   return (
     <motion.div 
-      className="group cursor-pointer flex flex-col w-full bg-white border border-gray-200 hover:border-gray-300 transition-colors duration-300"
+      className="group cursor-pointer flex flex-col w-full bg-white border border-gray-200 hover:border-gray-300 transition-colors duration-300 h-full"
       onClick={() => navigate(`/product/${product._id}`)}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -89,22 +86,32 @@ export const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
       <div className="p-6 flex flex-col bg-white flex-grow">
         <div className="flex justify-between items-baseline mb-1">
           <h3 className="font-display text-xl text-[#111] tracking-tight">{product.name}</h3>
-          <p className="font-display text-lg text-[#111]">${product.price}</p>
+          <p className="font-display text-lg text-[#111]">₹{product.price}</p>
         </div>
         <p className="text-sm text-gray-500 font-sans">{product.tagline || product.description?.substring(0, 50) + "..."}</p>
       </div>
 
-      {/* Persistent Add to Cart Footer */}
-      <div 
-        className="w-full border-t border-gray-100 py-4 px-6 flex items-center justify-center gap-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#111] bg-white group-hover:bg-[#111] group-hover:text-white transition-colors duration-300 disabled:opacity-50"
-        onClick={handleAddToCart}
-      >
-        {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
+      {/* Footer Area */}
+      <div className="mt-auto" onClick={(e) => e.stopPropagation()}>
+        {customFooter ? (
+          // Render custom action (like Bundle Counters)
+          <div className="w-full border-t border-gray-100 bg-white">
+            {customFooter}
+          </div>
         ) : (
-          <ShoppingBag className="w-4 h-4" />
+          // Default Add to Cart
+          <div 
+            className="w-full border-t border-gray-100 py-4 px-6 flex items-center justify-center gap-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#111] bg-white group-hover:bg-[#111] group-hover:text-white transition-colors duration-300 disabled:opacity-50"
+            onClick={handleAddToCart}
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <ShoppingBag className="w-4 h-4" />
+            )}
+            {isLoading ? "ADDING..." : "ADD TO CART"}
+          </div>
         )}
-        {isLoading ? "ADDING..." : "ADD TO CART"}
       </div>
     </motion.div>
   );

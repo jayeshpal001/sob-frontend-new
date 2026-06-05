@@ -30,19 +30,16 @@ export const Navbar = () => {
 
   // Live Database Cart State (For Logged In Users)
   const { data: dbCartResponse } = useGetCartQuery(undefined, {
-    skip: !isAuthenticated, // Only fetch if logged in
+    skip: !isAuthenticated,
   });
 
   // Calculate True Cart Count
   const itemCount = useMemo(() => {
-    // If user is authenticated, calculate from the live database cart
     if (isAuthenticated) {
       const rawDbCart = dbCartResponse?.data || dbCartResponse || {};
       const dbCartItems = rawDbCart.items || [];
       return dbCartItems.reduce((total: number, item: any) => total + (item.quantity || 1), 0);
     }
-    
-    // If guest, calculate from local Redux state
     return localCartItems.reduce((total, item) => total + (item.quantity || 1), 0);
   }, [isAuthenticated, dbCartResponse, localCartItems]);
 
@@ -64,6 +61,7 @@ export const Navbar = () => {
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Collection", href: "/collection" },
+    { name: "Build Your Own Box", href: "/build-your-own-box" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
   ];
@@ -79,10 +77,11 @@ export const Navbar = () => {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100"
       >
-        <div className="max-w-[1600px] mx-auto px-6 md:px-12 h-24 flex justify-between items-center">
+        {/* Added gap-8 to maintain spacing between logo and nav */}
+        <div className="max-w-[1600px] mx-auto px-6 md:px-12 h-24 flex justify-between items-center gap-8">
           
           {/* Left: Hamburger (Mobile Only) & Logo */}
-          <div className="w-1/2 lg:w-1/3 flex items-center justify-start gap-4">
+          <div className="flex-shrink-0 flex items-center justify-start gap-4">
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="flex lg:hidden p-2 -ml-2"
@@ -94,26 +93,26 @@ export const Navbar = () => {
               className="relative flex items-center cursor-pointer group"
             >
               <img
-                src="/sob-logo.jpg"
+                src="/sob-logo.png"
                 alt="SOB Fragrances"
                 className="h-10 lg:h-16 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
               />
             </Link>
           </div>
 
-          {/* Center Space (Desktop) to balance the layout */}
-          <div className="w-1/3 hidden lg:block"></div>
-
-          {/* Right Navigation & Cart */}
-          <div className="w-1/2 lg:w-1/3 flex justify-end items-center gap-6 lg:gap-8 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-900">
-            <nav className="hidden lg:flex gap-8">
+          {/* Right Navigation & Cart - Changed to flex-1 so it takes all remaining space */}
+          <div className="flex-1 flex justify-end items-center gap-6 lg:gap-8 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-900">
+            
+            <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.href}
-                  className="relative group overflow-hidden"
+                  // Added flex-shrink-0 and pb-1 to stop text from squishing and slicing
+                  className="relative group overflow-hidden flex-shrink-0 pb-1"
                 >
-                  <span className="group-hover:text-black transition-colors duration-300">
+                  {/* Added whitespace-nowrap so text stays on one line */}
+                  <span className="group-hover:text-black transition-colors duration-300 block whitespace-nowrap">
                     {link.name}
                   </span>
                   <span className="absolute bottom-0 left-0 w-full h-[1px] bg-black -translate-x-[101%] group-hover:translate-x-0 transition-transform duration-500 ease-out" />
@@ -121,44 +120,46 @@ export const Navbar = () => {
               ))}
             </nav>
 
-            {/* Search Icon Modal Trigger */}
-            <button
-              onClick={() => dispatch(toggleSearch())}
-              className="hidden sm:flex relative items-center justify-center group"
-            >
-              <Search
-                strokeWidth={1.5}
-                className="w-5 h-5 group-hover:stroke-black transition-colors"
-              />
-            </button>
+            <div className="flex items-center gap-4 lg:gap-6 ml-2 lg:ml-4 border-l border-gray-200 pl-4 lg:pl-6">
+              {/* Search Icon */}
+              <button
+                onClick={() => dispatch(toggleSearch())}
+                className="hidden sm:flex relative items-center justify-center group"
+              >
+                <Search
+                  strokeWidth={1.5}
+                  className="w-5 h-5 group-hover:stroke-black transition-colors"
+                />
+              </button>
 
-            {/* Dynamic User Route Navigation */}
-            <Link
-              to={isAuthenticated ? "/profile" : "/auth"}
-              className="hidden sm:flex relative items-center justify-center group"
-            >
-              <User
-                strokeWidth={1.5}
-                className="w-5 h-5 group-hover:stroke-black transition-colors"
-              />
-            </Link>
+              {/* Dynamic User Route Navigation */}
+              <Link
+                to={isAuthenticated ? "/profile" : "/auth"}
+                className="hidden sm:flex relative items-center justify-center group"
+              >
+                <User
+                  strokeWidth={1.5}
+                  className="w-5 h-5 group-hover:stroke-black transition-colors"
+                />
+              </Link>
 
-            {/* Cart Icon */}
-            <button
-              onClick={() => dispatch(toggleCart())}
-              className="relative flex items-center justify-center group"
-            >
-              <ShoppingBag
-                strokeWidth={1.5}
-                className="w-5 h-5 group-hover:stroke-black transition-colors"
-              />
-              {/* Only show badge if there are items in the cart */}
-              {itemCount > 0 && (
-                <span className="absolute -top-1 -right-2 w-4 h-4 bg-black text-white text-[9px] flex items-center justify-center rounded-full">
-                  {itemCount}
-                </span>
-              )}
-            </button>
+              {/* Cart Icon */}
+              <button
+                onClick={() => dispatch(toggleCart())}
+                className="relative flex items-center justify-center group"
+              >
+                <ShoppingBag
+                  strokeWidth={1.5}
+                  className="w-5 h-5 group-hover:stroke-black transition-colors"
+                />
+                {itemCount > 0 && (
+                  <span className="absolute -top-1 -right-2 w-4 h-4 bg-black text-white text-[9px] flex items-center justify-center rounded-full">
+                    {itemCount}
+                  </span>
+                )}
+              </button>
+            </div>
+            
           </div>
         </div>
       </motion.header>

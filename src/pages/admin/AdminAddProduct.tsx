@@ -1,7 +1,7 @@
 // src/pages/admin/AdminAddProduct.tsx
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, UploadCloud, Save, Loader2, X } from "lucide-react";
+import { ArrowLeft, UploadCloud, Save, Loader2, X, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useCreateProductMutation, useGetCategoriesQuery } from "../../store/api/adminApi";
@@ -20,20 +20,41 @@ export const AdminAddProduct = () => {
     tagline: "", 
     description: "",
     price: "",
+    basePrice: "", // Added Base Price
     stock: "",
     category: "",
     badge: "",
-    size: "100ML", 
+    size: "100ML", // Default fallback
     scentNotes: "", 
     ingredients: "Alcohol Denat., Fragrance (Parfum), Water (Aqua), Linalool, Limonene.", 
     shippingAndReturns: "Free standard shipping on all orders. Returns accepted within 14 days of delivery.", 
   });
+
+  // Dynamic Variants State
+  const [variants, setVariants] = useState<{ size: string; price: string; basePrice: string; stock: string }[]>([]);
 
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Variant Handlers
+  const handleAddVariant = () => {
+    setVariants([...variants, { size: "", price: "", basePrice: "", stock: "" }]);
+  };
+
+  const handleRemoveVariant = (index: number) => {
+    const newVariants = [...variants];
+    newVariants.splice(index, 1);
+    setVariants(newVariants);
+  };
+
+  const handleVariantChange = (index: number, field: string, value: string) => {
+    const newVariants = [...variants];
+    newVariants[index] = { ...newVariants[index], [field]: value };
+    setVariants(newVariants);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,7 +77,7 @@ export const AdminAddProduct = () => {
     e.preventDefault();
     
     if (!formData.name || !formData.price || !formData.category) {
-      toast.error("Please fill in all required fields (Name, Price, Category).");
+      toast.error("Please fill in all required fields (Name, Selling Price, Category).");
       return;
     }
 
@@ -66,6 +87,7 @@ export const AdminAddProduct = () => {
       // Core Details
       submitData.append("name", formData.name);
       submitData.append("price", formData.price);
+      if (formData.basePrice) submitData.append("basePrice", formData.basePrice);
       submitData.append("stock", formData.stock || "0");
       submitData.append("category", formData.category);
       
@@ -78,6 +100,15 @@ export const AdminAddProduct = () => {
       if (formData.ingredients) submitData.append("ingredients", formData.ingredients);
       if (formData.shippingAndReturns) submitData.append("shippingAndReturns", formData.shippingAndReturns);
       
+      // Append Variants as JSON String
+      if (variants.length > 0) {
+        // Filter out empty variants before sending
+        const validVariants = variants.filter(v => v.size && v.price);
+        if (validVariants.length > 0) {
+          submitData.append("variants", JSON.stringify(validVariants));
+        }
+      }
+
       // Append Images
       if (imageFiles.length > 0) {
         imageFiles.forEach((file) => {
@@ -164,6 +195,69 @@ export const AdminAddProduct = () => {
           </div>
 
           <div className="bg-white p-8 border border-gray-200 shadow-sm space-y-6">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-900">Size Variants & Dynamic Pricing</h3>
+              <button 
+                type="button" 
+                onClick={handleAddVariant}
+                className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-[#111] hover:text-gray-600 transition-colors"
+              >
+                <Plus className="w-3 h-3" /> Add Variant
+              </button>
+            </div>
+            
+            {variants.length === 0 ? (
+              <p className="text-sm text-gray-500 italic">No variants added. The default Price and Stock (on the right) will be used.</p>
+            ) : (
+              <div className="space-y-4">
+                {variants.map((variant, index) => (
+                  <div key={index} className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end bg-[#F9FAFB] p-4 border border-gray-100 relative group">
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">Size</label>
+                      <input 
+                        type="text" placeholder="e.g. 50ML" value={variant.size}
+                        onChange={(e) => handleVariantChange(index, "size", e.target.value)}
+                        className="w-full p-2 bg-white border border-gray-200 focus:border-black outline-none text-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">Selling Price</label>
+                      <input 
+                        type="number" placeholder="0" value={variant.price}
+                        onChange={(e) => handleVariantChange(index, "price", e.target.value)}
+                        className="w-full p-2 bg-white border border-gray-200 focus:border-black outline-none text-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">Base Price (MRP)</label>
+                      <input 
+                        type="number" placeholder="0" value={variant.basePrice}
+                        onChange={(e) => handleVariantChange(index, "basePrice", e.target.value)}
+                        className="w-full p-2 bg-white border border-gray-200 focus:border-black outline-none text-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">Stock</label>
+                      <input 
+                        type="number" placeholder="0" value={variant.stock}
+                        onChange={(e) => handleVariantChange(index, "stock", e.target.value)}
+                        className="w-full p-2 bg-white border border-gray-200 focus:border-black outline-none text-sm"
+                      />
+                    </div>
+                    <button 
+                      type="button"
+                      onClick={() => handleRemoveVariant(index)}
+                      className="p-2 bg-white border border-red-200 text-red-500 hover:bg-red-50 transition-colors h-[38px] flex items-center justify-center w-full sm:w-auto"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white p-8 border border-gray-200 shadow-sm space-y-6">
             <h3 className="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-4">Premium Details</h3>
             
             <div className="space-y-2">
@@ -198,21 +292,33 @@ export const AdminAddProduct = () => {
         <div className="space-y-8">
           
           <div className="bg-white p-8 border border-gray-200 shadow-sm grid grid-cols-2 gap-6">
-            <div className="col-span-2"><h3 className="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-4">Pricing & Inventory</h3></div>
+            <div className="col-span-2">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-4">Default Pricing & Inventory</h3>
+              <p className="text-xs text-gray-500 mt-2">Used if no variants are provided above.</p>
+            </div>
             
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Price (₹) *</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Selling Price (₹) *</label>
               <input 
                 type="number" name="price" value={formData.price} onChange={handleChange} required min="0"
-                placeholder="0.00"
+                placeholder="0"
                 className="w-full p-3 bg-[#F9FAFB] border border-transparent focus:border-gray-300 focus:bg-white outline-none text-sm transition-all duration-300"
               />
             </div>
 
             <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Base Price / MRP (₹)</label>
+              <input 
+                type="number" name="basePrice" value={formData.basePrice} onChange={handleChange} min="0"
+                placeholder="0"
+                className="w-full p-3 bg-[#F9FAFB] border border-transparent focus:border-gray-300 focus:bg-white outline-none text-sm transition-all duration-300"
+              />
+            </div>
+
+            <div className="col-span-2 space-y-2">
               <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Stock Quantity</label>
               <input 
-                type="number" name="stock" value={formData.stock} onChange={handleChange} required min="0"
+                type="number" name="stock" value={formData.stock} onChange={handleChange} min="0"
                 placeholder="0"
                 className="w-full p-3 bg-[#F9FAFB] border border-transparent focus:border-gray-300 focus:bg-white outline-none text-sm transition-all duration-300"
               />
@@ -268,7 +374,7 @@ export const AdminAddProduct = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Bottle Size</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Default Bottle Size</label>
               <input 
                 type="text" name="size" value={formData.size} onChange={handleChange}
                 placeholder="e.g. 100ML or 50ML"

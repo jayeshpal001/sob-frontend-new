@@ -14,7 +14,7 @@ export const Footer = () => {
           <div className="md:col-span-1 flex flex-col items-start">
             <Link to="/" className="mb-6">
               <img 
-                src="/sob-logo.jpg" 
+                src="/sob-logo.png" 
                 alt="SOB" 
                 className="h-12 w-auto object-contain"
               />

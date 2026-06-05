@@ -95,6 +95,12 @@ export const userApi = baseApi.injectEndpoints({
       query: (queryString = "") => `/user/products/browse${queryString}`,
       providesTags: ["UserProducts"],
     }),
+    
+    getBundleProducts: builder.query<any, void>({
+      query: () => "/user/products/bundle",
+      providesTags: ["UserProducts"],
+    }),
+    
     getProductById: builder.query<any, string>({
       query: (id) => `/user/products/${id}`,
       providesTags: ["UserProducts"],
@@ -196,14 +202,20 @@ export const userApi = baseApi.injectEndpoints({
     // ==================== BANNER ROUTES ====================
     getActiveBanner: builder.query<any, void>({
       query: () => "/user/banners/active",
-      providesTags: ["Banners"] as any, // Optional: if you have Banners tag
+      providesTags: ["Banners"] as any, 
     }),
 
-    // ==================== GLOBAL SETTINGS (Tax & Delivery) ====================
-    getUserSettings: builder.query<any, void>({
-      query: () => "/settings", // Yeh wahi same backend route hai
+    // ==================== GLOBAL SETTINGS (Tax, Delivery & Bundle) ====================
+    getSettings: builder.query<any, string | void>({
+      query: () => "/settings",
       providesTags: ["Settings"] as any,
     }),
+
+    // ==================== CATEGORIES ====================
+    getUserCategories: builder.query<any, void>({
+      query: () => '/admin/categories', 
+    }),
+
   }),
   overrideExisting: false,
 });
@@ -228,6 +240,7 @@ export const {
 
   // Products
   useGetAllProductsQuery,
+  useGetBundleProductsQuery,
   useGetProductByIdQuery,
 
   // Cart
@@ -253,6 +266,10 @@ export const {
 
   // Banners
   useGetActiveBannerQuery,
+  
   // Settings
-  useGetUserSettingsQuery,
+  useGetSettingsQuery,
+  
+  // Categories
+  useGetUserCategoriesQuery,
 } = userApi;

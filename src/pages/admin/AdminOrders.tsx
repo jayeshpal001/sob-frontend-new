@@ -1,12 +1,11 @@
 // src/pages/admin/AdminOrders.tsx
-
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { Search, Eye, Loader2, X, MapPin, Package, Ticket } from "lucide-react"; 
+import { Search, Eye, Loader2, X, MapPin, Package, Ticket, Truck } from "lucide-react"; 
 import { toast } from "sonner";
 import { useGetOrdersQuery, useUpdateOrderStatusMutation } from "../../store/api/adminApi"; 
 
-const statuses = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
+const statuses = ["Pending", "Confirmed", "Processing", "Shipped", "Delivered", "Cancelled"];
 
 export const AdminOrders = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,6 +49,7 @@ export const AdminOrders = () => {
     switch (status?.toLowerCase()) {
       case 'delivered': return 'bg-green-50 text-green-700 border-green-200';
       case 'shipped': return 'bg-[#111] text-white border-[#111]';
+      case 'confirmed': return 'bg-purple-50 text-purple-700 border-purple-200'; 
       case 'pending': return 'bg-orange-50 text-orange-700 border-orange-200';
       case 'processing': return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'cancelled': return 'bg-red-50 text-red-700 border-red-200';
@@ -143,7 +143,9 @@ export const AdminOrders = () => {
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="text-sm font-semibold text-gray-900 font-mono">#{order._id.substring(0, 8).toUpperCase()}</span>
-                        <span className="text-xs text-gray-500 mt-1">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</span>
+                        <span className="text-xs text-gray-500 mt-1">
+                          {order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A'}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -219,6 +221,9 @@ export const AdminOrders = () => {
                 <div>
                   <h3 className="font-display text-xl text-gray-900">Order Details</h3>
                   <p className="text-xs font-mono text-gray-500 mt-1">#{selectedOrder._id}</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5 font-medium uppercase tracking-widest">
+                    {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : ''}
+                  </p>
                 </div>
                 <button onClick={() => setSelectedOrder(null)} className="p-2 text-gray-400 hover:text-black hover:bg-gray-200 rounded-full transition-colors">
                   <X className="w-5 h-5" />
@@ -274,12 +279,29 @@ export const AdminOrders = () => {
                   </h4>
                   <div className="space-y-4">
                     {selectedOrder.products?.map((item: any, idx: number) => (
-                      <div key={idx} className="flex justify-between items-start">
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{item.productId?.name || "Unknown Product"}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity} × ₹{item.price}</p>
+                      <div key={idx} className="flex flex-col gap-2 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                              {item.isBundle ? item.name || "Custom Discovery Box" : (item.productId?.name || "Unknown Product")}
+                              {item.size && !item.isBundle && <span className="text-[10px] text-gray-400 font-sans tracking-widest mt-0.5">| {item.size}</span>}
+                              {item.isBundle && <Package className="w-3 h-3 text-gray-400" />}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity} × ₹{item.price}</p>
+                          </div>
+                          <p className="text-sm font-semibold text-gray-900">₹{(item.quantity * item.price).toLocaleString()}</p>
                         </div>
-                        <p className="text-sm font-semibold text-gray-900">₹{(item.quantity * item.price).toLocaleString()}</p>
+                        
+                        {/* Render Bundle Contents if it's a bundle */}
+                        {item.isBundle && item.bundleContents && item.bundleContents.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-1 pl-2 border-l-2 border-gray-100">
+                            {item.bundleContents.map((content: any, i: number) => (
+                              <span key={i} className="text-[10px] text-gray-500 bg-gray-50 px-1.5 py-0.5 border border-gray-200">
+                                {content.name} <span className="font-semibold">(x{content.quantity})</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -301,8 +323,15 @@ export const AdminOrders = () => {
 
                   {selectedOrder.tax > 0 && (
                     <div className="flex justify-between text-sm text-gray-600">
-                      <span>Tax (Estimated)</span>
+                      <span>Tax</span>
                       <span>₹{selectedOrder.tax?.toLocaleString()}</span>
+                    </div>
+                  )}
+
+                  {selectedOrder.deliveryFee !== undefined && (
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span className="flex items-center gap-1.5"><Truck className="w-3.5 h-3.5" /> Delivery Fee</span>
+                      <span>{selectedOrder.deliveryFee === 0 ? <span className="text-[10px] bg-green-50 text-green-600 font-bold uppercase tracking-widest px-1.5 py-0.5 border border-green-200">Free</span> : `₹${selectedOrder.deliveryFee.toLocaleString()}`}</span>
                     </div>
                   )}
                   

@@ -1,7 +1,7 @@
 // src/pages/Collection.tsx
 import { useState } from "react";
 import { Search } from "lucide-react";
-import { useGetAllProductsQuery } from "../../store/api/userApi"; 
+import { useGetAllProductsQuery, useGetUserCategoriesQuery } from "../../store/api/userApi"; 
 import { ProductCard } from "../../components/ui/ProductCard";
 import { ProductSkeleton } from "../../components/ui/ProductSkeleton";
 
@@ -10,11 +10,13 @@ export const Collection = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
-  // 🚀 Fetch Live Products from API
+  // Fetch Live Products and Categories from API
   const { data: responseData, isLoading, isError } = useGetAllProductsQuery("");
+  const { data: categoriesResponse, isLoading: isCategoriesLoading } = useGetUserCategoriesQuery();
 
-  // Extract products safely from your JSON structure
+  // Extract data safely
   const rawProducts = responseData?.data || [];
+  const categories = categoriesResponse?.data || [];
 
   const filteredProducts = rawProducts.filter((p: any) => {
     // 1. Search Filter
@@ -23,7 +25,7 @@ export const Collection = () => {
     
     // 2. Category Filter (Handles both populated object {name: '...'} and flat string ID/name)
     const catName = (p.category?.name || p.category || "unisex").toLowerCase();
-    const matchesCategory = selectedCategory === "all" || catName.includes(selectedCategory);
+    const matchesCategory = selectedCategory === "all" || catName === selectedCategory;
     
     return matchesSearch && matchesCategory;
   }).sort((a: any, b: any) => {
@@ -72,24 +74,47 @@ export const Collection = () => {
               </div>
             </div>
 
-            {/* Categories */}
+            {/* Dynamic Categories */}
             <div>
               <h3 className="font-sans font-bold text-xs uppercase tracking-widest mb-4">Category</h3>
               <div className="flex flex-col space-y-3">
-                {['all', 'unisex', 'mens', 'womens'].map((cat) => (
-                  <label key={cat} className="flex items-center gap-3 cursor-pointer group">
-                    <input 
-                      type="radio" 
-                      name="category" 
-                      checked={selectedCategory === cat}
-                      onChange={() => setSelectedCategory(cat)}
-                      className="accent-black w-4 h-4 cursor-pointer"
-                    />
-                    <span className="text-sm text-gray-600 capitalize group-hover:text-black transition-colors">
-                      {cat}
-                    </span>
-                  </label>
-                ))}
+                
+                {/* Default All Option */}
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <input 
+                    type="radio" 
+                    name="category" 
+                    checked={selectedCategory === "all"}
+                    onChange={() => setSelectedCategory("all")}
+                    className="accent-black w-4 h-4 cursor-pointer"
+                  />
+                  <span className="text-sm text-gray-600 capitalize group-hover:text-black transition-colors">
+                    All
+                  </span>
+                </label>
+
+                {/* API Fetched Categories */}
+                {isCategoriesLoading ? (
+                  <span className="text-xs text-gray-400 animate-pulse">Loading...</span>
+                ) : (
+                  categories.map((cat: any) => {
+                    const catValue = cat.name.toLowerCase();
+                    return (
+                      <label key={cat._id} className="flex items-center gap-3 cursor-pointer group">
+                        <input 
+                          type="radio" 
+                          name="category" 
+                          checked={selectedCategory === catValue}
+                          onChange={() => setSelectedCategory(catValue)}
+                          className="accent-black w-4 h-4 cursor-pointer"
+                        />
+                        <span className="text-sm text-gray-600 capitalize group-hover:text-black transition-colors">
+                          {cat.name}
+                        </span>
+                      </label>
+                    );
+                  })
+                )}
               </div>
             </div>
 
@@ -150,7 +175,6 @@ export const Collection = () => {
             {!isLoading && !isError && filteredProducts.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
                 {filteredProducts.map((product: any) => (
-                  
                   <ProductCard key={product._id} product={product} />
                 ))}
               </div>

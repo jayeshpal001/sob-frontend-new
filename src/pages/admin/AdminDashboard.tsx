@@ -122,7 +122,7 @@ export const AdminDashboard = () => {
               <ShoppingBag className="w-5 h-5" />
             </div>
           </div>
-          <h3 className="text-4xl md:text-5xl font-display text-gray-900 tracking-tight">
+          <h3 className="text-4xl md:text-5xl  text-gray-900 tracking-tight">
             {stats.totalOrders.toLocaleString("en-IN")}
           </h3>
         </motion.div>
@@ -139,7 +139,7 @@ export const AdminDashboard = () => {
               <Users className="w-5 h-5" />
             </div>
           </div>
-          <h3 className="text-4xl md:text-5xl font-display text-gray-900 tracking-tight">
+          <h3 className="text-4xl md:text-5xl  text-gray-900 tracking-tight">
             {stats.totalUsers.toLocaleString("en-IN")}
           </h3>
         </motion.div>
