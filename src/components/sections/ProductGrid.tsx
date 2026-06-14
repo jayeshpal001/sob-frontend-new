@@ -2,19 +2,22 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { useGetAllProductsQuery } from "../../store/api/userApi"; // 🚀 API Hook
+import { useGetAllProductsQuery } from "../../store/api/userApi"; 
 import { ProductCard } from "../ui/ProductCard";
 
 export const ProductGrid = () => {
-
   const { data: response, isLoading, isError } = useGetAllProductsQuery();
 
   const products = response?.data || [];
   
-  const featuredProducts = products.slice(0, 3);
+  // 🚀 Smart Filter: Only keeps products with "Best" or "New" in their badge, then takes the top 4
+  const featuredProducts = products.filter((product: any) => {
+    const badge = product.badge?.toLowerCase() || "";
+    return badge.includes("best") || badge.includes("new");
+  }).slice(0, 4);
 
   return (
-    <section className="w-full bg-white py-32">
+    <section className="w-full bg-white py-24">
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         
         {/* Section Header */}
@@ -26,16 +29,16 @@ export const ProductGrid = () => {
             transition={{ duration: 0.6 }}
             className="uppercase tracking-[0.3em] text-[10px] font-bold text-gray-500 mb-4"
           >
-            The Collection
+            Top Picks
           </motion.span>
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-display text-gray-900 mb-6"
+            className="text-3xl md:text-4xl lg:text-5xl font-display text-gray-900 mb-6"
           >
-            Our Signature Scents
+            Bestsellers & New Arrivals
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -44,11 +47,11 @@ export const ProductGrid = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="text-gray-600 max-w-lg mx-auto text-sm leading-relaxed"
           >
-            Each fragrance is a masterpiece — meticulously composed from the world's finest ingredients.
+            Discover the most loved and latest additions to our luxury collection.
           </motion.p>
         </div>
 
-        {/* Dynamic Content Area (Loading, Error, or Grid) */}
+        {/* Dynamic Content Area */}
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-gray-300" />
@@ -58,14 +61,15 @@ export const ProductGrid = () => {
             Unable to load the collection at this moment.
           </div>
         ) : featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          /* 🚀 UPDATED GRID: 2 cols on mobile, 3 on tablet, 4 on desktop (Makes cards smaller & compact) */
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
             {featuredProducts.map((product: any, index: number) => (
               <ProductCard key={product._id} product={product} index={index} />
             ))}
           </div>
         ) : (
           <div className="text-center py-20 text-gray-500 font-sans text-sm tracking-widest uppercase">
-            No products found.
+            No featured products found.
           </div>
         )}
 
@@ -75,7 +79,7 @@ export const ProductGrid = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="mt-20 flex justify-center"
+          className="mt-16 flex justify-center"
         >
           <Link to="/collection" className="group flex items-center gap-4 text-xs font-bold uppercase tracking-[0.2em] text-[#111] hover:text-gray-600 transition-colors">
             Explore Full Collection

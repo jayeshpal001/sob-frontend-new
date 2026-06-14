@@ -1,52 +1,75 @@
 // src/pages/Collection.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { useGetAllProductsQuery, useGetUserCategoriesQuery } from "../../store/api/userApi"; 
 import { ProductCard } from "../../components/ui/ProductCard";
 import { ProductSkeleton } from "../../components/ui/ProductSkeleton";
 
+const getCleanCategory = (rawName: string) => {
+  if (!rawName) return "unisex";
+  const lower = rawName.toLowerCase();
+  if (lower.includes("female") || lower.includes("women")) return "women";
+  if (lower.includes("men") || lower.includes("male")) return "men";
+  if (lower.includes("unisex")) return "unisex";
+  if (lower.includes("luxury") || lower.includes("attar") || lower.includes("itra")) return "attar";
+  return lower;
+};
+
 export const Collection = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlCategory = searchParams.get("category")?.toLowerCase() || "all";
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState(urlCategory); 
   const [sortBy, setSortBy] = useState("newest");
 
-  // Fetch Live Products and Categories from API
+  useEffect(() => {
+    setSelectedCategory(searchParams.get("category")?.toLowerCase() || "all");
+  }, [searchParams]);
+
   const { data: responseData, isLoading, isError } = useGetAllProductsQuery("");
   const { data: categoriesResponse, isLoading: isCategoriesLoading } = useGetUserCategoriesQuery();
 
-  // Extract data safely
   const rawProducts = responseData?.data || [];
   const categories = categoriesResponse?.data || [];
 
   const filteredProducts = rawProducts.filter((p: any) => {
-    // 1. Search Filter
     const matchesSearch = p.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           p.description?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // 2. Category Filter (Handles both populated object {name: '...'} and flat string ID/name)
-    const catName = (p.category?.name || p.category || "unisex").toLowerCase();
-    const matchesCategory = selectedCategory === "all" || catName === selectedCategory;
+    const rawCatName = p.category?.name || p.category || "";
+    const cleanCatName = getCleanCategory(rawCatName);
+    
+    const matchesCategory = selectedCategory === "all" || cleanCatName === selectedCategory;
     
     return matchesSearch && matchesCategory;
   }).sort((a: any, b: any) => {
-    // 3. Sorting
     if (sortBy === "price-asc") return a.price - b.price;
     if (sortBy === "price-desc") return b.price - a.price;
-    // Newest default 
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
+
+  const handleCategoryChange = (cleanValue: string) => {
+    setSelectedCategory(cleanValue);
+    if (cleanValue === "all") {
+      setSearchParams({});
+    } else {
+      setSearchParams({ category: cleanValue }); 
+    }
+  };
 
   const handleClearFilters = () => {
     setSearchTerm("");
     setSelectedCategory("all");
     setSortBy("newest");
+    setSearchParams({});
   };
 
   return (
     <div className="w-full min-h-screen pt-32 pb-32 bg-[var(--color-surface)]">
       <div className="max-w-[1600px] mx-auto px-6 md:px-12">
         
-        {/* Page Header */}
         <div className="mb-16">
           <h1 className="text-5xl md:text-6xl font-display text-gray-900 mb-4">The Collection</h1>
           <p className="text-gray-500 font-sans max-w-xl">
@@ -56,10 +79,8 @@ export const Collection = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
-          {/* Left Sidebar: Filters (Sticky) */}
           <div className="lg:col-span-3 lg:sticky lg:top-32 space-y-10">
             
-            {/* Search */}
             <div>
               <h3 className="font-sans font-bold text-xs uppercase tracking-widest mb-4">Search</h3>
               <div className="relative group">
@@ -74,18 +95,16 @@ export const Collection = () => {
               </div>
             </div>
 
-            {/* Dynamic Categories */}
             <div>
               <h3 className="font-sans font-bold text-xs uppercase tracking-widest mb-4">Category</h3>
               <div className="flex flex-col space-y-3">
                 
-                {/* Default All Option */}
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input 
                     type="radio" 
                     name="category" 
                     checked={selectedCategory === "all"}
-                    onChange={() => setSelectedCategory("all")}
+                    onChange={() => handleCategoryChange("all")}
                     className="accent-black w-4 h-4 cursor-pointer"
                   />
                   <span className="text-sm text-gray-600 capitalize group-hover:text-black transition-colors">
@@ -93,19 +112,18 @@ export const Collection = () => {
                   </span>
                 </label>
 
-                {/* API Fetched Categories */}
                 {isCategoriesLoading ? (
                   <span className="text-xs text-gray-400 animate-pulse">Loading...</span>
                 ) : (
                   categories.map((cat: any) => {
-                    const catValue = cat.name.toLowerCase();
+                    const cleanValue = getCleanCategory(cat.name);
                     return (
                       <label key={cat._id} className="flex items-center gap-3 cursor-pointer group">
                         <input 
                           type="radio" 
                           name="category" 
-                          checked={selectedCategory === catValue}
-                          onChange={() => setSelectedCategory(catValue)}
+                          checked={selectedCategory === cleanValue}
+                          onChange={() => handleCategoryChange(cleanValue)}
                           className="accent-black w-4 h-4 cursor-pointer"
                         />
                         <span className="text-sm text-gray-600 capitalize group-hover:text-black transition-colors">
@@ -118,7 +136,6 @@ export const Collection = () => {
               </div>
             </div>
 
-            {/* Sort */}
             <div>
               <h3 className="font-sans font-bold text-xs uppercase tracking-widest mb-4">Sort By</h3>
               <select 
@@ -141,24 +158,20 @@ export const Collection = () => {
 
           </div>
 
-          {/* Right Area: Product Grid */}
           <div className="lg:col-span-9">
             
-            {/* Loading State */}
             {isLoading && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
                 {[1, 2, 3, 4, 5, 6].map((n) => <ProductSkeleton key={n} />)}
               </div>
             )}
 
-            {/* Error State */}
             {isError && (
               <div className="text-red-500 py-20 text-center border border-red-100 bg-red-50 text-sm tracking-widest uppercase font-bold">
                 Failed to load the collection. Please check your connection.
               </div>
             )}
 
-            {/* Success State - Empty Results */}
             {!isLoading && !isError && filteredProducts.length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-center bg-white border border-gray-100 shadow-sm">
                 <p className="text-gray-500 mb-4">No fragrances match your current filters.</p>
@@ -171,7 +184,6 @@ export const Collection = () => {
               </div>
             )}
 
-            {/* Success State - Render Grid */}
             {!isLoading && !isError && filteredProducts.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
                 {filteredProducts.map((product: any) => (
