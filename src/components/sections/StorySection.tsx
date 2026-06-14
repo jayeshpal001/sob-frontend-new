@@ -68,7 +68,7 @@ export const StorySection = () => {
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mt-2">Countries</p>
             </div>
             <div>
-              <h4 className="text-3xl font-display text-black">12</h4>
+              <h4 className="text-3xl font-display text-black">15+</h4>
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mt-2">Master Perfumers</p>
             </div>
             <div>

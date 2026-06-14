@@ -1,31 +1,31 @@
 // src/components/sections/FeaturesSection.tsx
-import { motion,type Variants } from "framer-motion";
-import { Droplets, Sparkles, Fingerprint, Gift } from "lucide-react";
+import { motion, type Variants } from "framer-motion";
+import { Droplets, Sparkles, Fingerprint, Clock } from "lucide-react";
 
 const features = [
   {
-    icon: <Droplets strokeWidth={1} className="w-8 h-8 mb-6 text-gray-900" />,
-    title: "Long-Lasting Fragrance",
-    desc: "Our Eau de Parfum formulations deliver 12+ hours of captivating scent that evolves beautifully throughout the day."
+    icon: <Sparkles strokeWidth={1} className="w-8 h-8 mb-6 text-gray-900" />,
+    title: "Premium Quality Ingredients",
+    desc: "Made with carefully selected fragrance compounds and fine ingredients to ensure exceptional quality and consistency."
   },
   {
-    icon: <Sparkles strokeWidth={1} className="w-8 h-8 mb-6 text-gray-900" />,
-    title: "Premium Ingredients",
-    desc: "Sourced from the world's most prestigious ingredient houses — from French jasmine to Indian sandalwood."
+    icon: <Droplets strokeWidth={1} className="w-8 h-8 mb-6 text-gray-900" />,
+    title: "Extrait de Parfum",
+    desc: "Crafted with a high concentration of premium fragrance oils for an intense, rich, and luxurious scent experience."
+  },
+  {
+    icon: <Clock strokeWidth={1} className="w-8 h-8 mb-6 text-gray-900" />,
+    title: "8 to 12 Hours Performance",
+    desc: "Designed to stay with you from morning to night, leaving a powerful and elegant trail wherever you go."
   },
   {
     icon: <Fingerprint strokeWidth={1} className="w-8 h-8 mb-6 text-gray-900" />,
     title: "Unique Scent Profiles",
-    desc: "Each fragrance is an original composition created by our master perfumers. No duplicates, no shortcuts."
-  },
-  {
-    icon: <Gift strokeWidth={1} className="w-8 h-8 mb-6 text-gray-900" />,
-    title: "Luxury Packaging",
-    desc: "Presented in hand-crafted bottles and premium gift boxes — because the experience begins before the first spray."
+    desc: "Every SOB creation features a unique blend of notes, carefully designed to offer a signature scent that stands out."
   }
 ];
 
-// Staggered animation variants for the grid explicitly typed to fix TS errors
+// Staggered animation variants
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
