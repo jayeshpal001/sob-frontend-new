@@ -6,9 +6,13 @@ import { Button } from "../ui/Button";
 
 // Array of bottle images to slide through
 const bottleImages = [
-  "/sob-perfume-bottle.png",
-  "/sob-perfume-bottle-2.png", 
-  "/sob-perfume-bottle-3.png"
+  // "/sob-perfume-bottle.png",
+  // "/sob-perfume-bottle-2.png", 
+  // "/sob-perfume-bottle-3.png",
+  "/sob-bottle-1.png",
+  "/sob-bottle-2.png",
+  "/sob-bottle-3.png",
+  "/sob-bottle-4.png",
 ];
 
 export const HeroSection = () => {
@@ -128,7 +132,7 @@ export const HeroSection = () => {
           <motion.div
             animate={{ y: ["-55%", "-60%", "-55%"] }} // Gentle floating effect
             transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-            className="absolute top-1/2 left-1/2 w-[75%] lg:w-[70%] max-w-[280px] lg:max-w-[550px] z-20 pointer-events-none flex items-center justify-center"
+            className="absolute top-1/2 left-1/2 w-[75%] lg:w-[70%] max-w-[280px] lg:max-w-[480px] z-20 pointer-events-none flex items-center justify-center"
             style={{ x: "-50%", y: "-55%" }} 
           >
             <AnimatePresence mode="wait">

@@ -7,6 +7,8 @@ import { TestimonialSection } from "../../components/sections/TestimonialSection
 import { ContactSection } from "../../components/sections/ContactSection";
 import { BannerPopup } from "../../components/common/BannerPopup"; 
 import { CategoryBanner } from "../../components/sections/CategoryBanner";
+import { InfiniteSlider } from "../../components/ui/InfiniteSlider";
+import { BuildYourBoxBanner } from "../../components/sections/BuildYourBoxBanner";
 
 export const Home = () => {
   return (
@@ -14,8 +16,10 @@ export const Home = () => {
       <BannerPopup />
       
       <HeroSection />
+      <InfiniteSlider />
       <CategoryBanner />
       <ProductGrid />
+      <BuildYourBoxBanner />
       <StorySection />
       <FeaturesSection />
       <TestimonialSection />

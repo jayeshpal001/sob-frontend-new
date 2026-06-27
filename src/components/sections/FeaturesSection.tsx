@@ -4,24 +4,24 @@ import { Droplets, Sparkles, Fingerprint, Clock } from "lucide-react";
 
 const features = [
   {
-    icon: <Sparkles strokeWidth={1} className="w-8 h-8 mb-6 text-gray-900" />,
-    title: "Premium Quality Ingredients",
-    desc: "Made with carefully selected fragrance compounds and fine ingredients to ensure exceptional quality and consistency."
-  },
-  {
     icon: <Droplets strokeWidth={1} className="w-8 h-8 mb-6 text-gray-900" />,
-    title: "Extrait de Parfum",
+    title: "40% Oil Concentration",
     desc: "Crafted with a high concentration of premium fragrance oils for an intense, rich, and luxurious scent experience."
   },
   {
     icon: <Clock strokeWidth={1} className="w-8 h-8 mb-6 text-gray-900" />,
-    title: "8 to 12 Hours Performance",
+    title: "Long Lasting Fragrance",
     desc: "Designed to stay with you from morning to night, leaving a powerful and elegant trail wherever you go."
   },
   {
+    icon: <Sparkles strokeWidth={1} className="w-8 h-8 mb-6 text-gray-900" />,
+    title: "Premium Quality",
+    desc: "Made with carefully selected fragrance compounds and fine ingredients to ensure exceptional quality and consistency."
+  },
+  {
     icon: <Fingerprint strokeWidth={1} className="w-8 h-8 mb-6 text-gray-900" />,
-    title: "Unique Scent Profiles",
-    desc: "Every SOB creation features a unique blend of notes, carefully designed to offer a signature scent that stands out."
+    title: "Made with Finest Oils",
+    desc: "Every SOB creation features a unique blend of the finest oils, carefully designed to offer a signature scent that stands out."
   }
 ];
 
