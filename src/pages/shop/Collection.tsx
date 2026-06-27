@@ -67,36 +67,36 @@ export const Collection = () => {
   };
 
   return (
-    <div className="w-full min-h-screen pt-32 pb-32 bg-[var(--color-surface)]">
-      <div className="max-w-[1600px] mx-auto px-6 md:px-12">
+    <div className="w-full min-h-screen pt-24 md:pt-32 pb-24 md:pb-32 bg-[var(--color-surface)]">
+      <div className="max-w-[1600px] mx-auto px-3 md:px-12">
         
-        <div className="mb-16">
-          <h1 className="text-5xl md:text-6xl font-display text-gray-900 mb-4">The Collection</h1>
-          <p className="text-gray-500 font-sans max-w-xl">
+        <div className="mb-10 md:mb-16 px-2 md:px-0">
+          <h1 className="text-4xl md:text-6xl font-display text-gray-900 mb-3 md:mb-4">The Collection</h1>
+          <p className="text-sm md:text-base text-gray-500 font-sans max-w-xl">
             Explore our complete range of signature scents. Filter by category or search for specific notes to find your perfect match.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
           
-          <div className="lg:col-span-3 lg:sticky lg:top-32 space-y-10">
+          <div className="lg:col-span-3 lg:sticky lg:top-32 space-y-8 md:space-y-10 px-2 md:px-0">
             
             <div>
-              <h3 className="font-sans font-bold text-xs uppercase tracking-widest mb-4">Search</h3>
+              <h3 className="font-sans font-bold text-xs uppercase tracking-widest mb-3 md:mb-4">Search</h3>
               <div className="relative group">
                 <input 
                   type="text" 
-                  placeholder="Search by name or note..." 
+                  placeholder="Search..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full border-b border-gray-300 py-3 pl-8 bg-transparent text-sm focus:outline-none focus:border-black transition-colors"
+                  className="w-full border-b border-gray-300 py-2 md:py-3 pl-8 bg-transparent text-sm focus:outline-none focus:border-black transition-colors"
                 />
-                <Search className="absolute left-0 top-3 w-4 h-4 text-gray-400 group-focus-within:text-black transition-colors" />
+                <Search className="absolute left-0 top-2.5 md:top-3 w-4 h-4 text-gray-400 group-focus-within:text-black transition-colors" />
               </div>
             </div>
 
             <div>
-              <h3 className="font-sans font-bold text-xs uppercase tracking-widest mb-4">Category</h3>
+              <h3 className="font-sans font-bold text-xs uppercase tracking-widest mb-3 md:mb-4">Category</h3>
               <div className="flex flex-col space-y-3">
                 
                 <label className="flex items-center gap-3 cursor-pointer group">
@@ -137,11 +137,11 @@ export const Collection = () => {
             </div>
 
             <div>
-              <h3 className="font-sans font-bold text-xs uppercase tracking-widest mb-4">Sort By</h3>
+              <h3 className="font-sans font-bold text-xs uppercase tracking-widest mb-3 md:mb-4">Sort By</h3>
               <select 
                 value={sortBy} 
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full border-b border-gray-300 py-3 bg-transparent text-sm text-gray-600 focus:outline-none focus:border-black transition-colors cursor-pointer rounded-none appearance-none"
+                className="w-full border-b border-gray-300 py-2 md:py-3 bg-transparent text-sm text-gray-600 focus:outline-none focus:border-black transition-colors cursor-pointer rounded-none appearance-none"
               >
                 <option value="newest">Newest Arrivals</option>
                 <option value="price-asc">Price: Low to High</option>
@@ -151,7 +151,7 @@ export const Collection = () => {
 
             <button 
               onClick={handleClearFilters}
-              className="text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-black transition-colors pt-4 border-b border-transparent hover:border-black"
+              className="text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-black transition-colors pt-2 md:pt-4 border-b border-transparent hover:border-black"
             >
               Clear All Filters
             </button>
@@ -161,7 +161,7 @@ export const Collection = () => {
           <div className="lg:col-span-9">
             
             {isLoading && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-6 md:gap-x-8 md:gap-y-12">
                 {[1, 2, 3, 4, 5, 6].map((n) => <ProductSkeleton key={n} />)}
               </div>
             )}
@@ -173,7 +173,7 @@ export const Collection = () => {
             )}
 
             {!isLoading && !isError && filteredProducts.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-20 text-center bg-white border border-gray-100 shadow-sm">
+              <div className="flex flex-col items-center justify-center py-20 text-center bg-white border border-gray-100 shadow-sm mx-2 md:mx-0">
                 <p className="text-gray-500 mb-4">No fragrances match your current filters.</p>
                 <button 
                   onClick={handleClearFilters}
@@ -185,7 +185,7 @@ export const Collection = () => {
             )}
 
             {!isLoading && !isError && filteredProducts.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-6 md:gap-x-8 md:gap-y-12">
                 {filteredProducts.map((product: any) => (
                   <ProductCard key={product._id} product={product} />
                 ))}

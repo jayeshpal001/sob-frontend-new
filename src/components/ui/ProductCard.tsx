@@ -56,7 +56,7 @@ export const ProductCard = ({ product, index = 0, customFooter }: ProductCardPro
 
   return (
     <motion.div 
-      className="group cursor-pointer flex flex-col w-full bg-white border border-gray-200 hover:border-gray-300 transition-colors duration-300 h-full"
+      className="group cursor-pointer flex flex-col w-full bg-white border border-gray-200 hover:border-gray-400 transition-colors duration-300 h-full"
       onClick={() => navigate(`/product/${product._id}`)}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -66,9 +66,9 @@ export const ProductCard = ({ product, index = 0, customFooter }: ProductCardPro
       {/* Image Wrapper */}
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#050505] flex items-center justify-center">
         
-        {/* Badge */}
+        {/* Responsive Badge */}
         {product.badge && (
-          <span className="absolute top-4 left-4 z-20 bg-black text-white text-[9px] font-bold uppercase tracking-[0.15em] px-3 py-1.5 shadow-md">
+          <span className="absolute top-2 left-2 md:top-4 md:left-4 z-20 bg-black text-white text-[7px] md:text-[9px] font-bold uppercase tracking-[0.15em] px-2 py-1 md:px-3 md:py-1.5 shadow-md">
             {product.badge}
           </span>
         )}
@@ -82,16 +82,23 @@ export const ProductCard = ({ product, index = 0, customFooter }: ProductCardPro
         />
       </div>
 
-      {/* Typography Section */}
-      <div className="p-6 flex flex-col bg-white flex-grow">
-        <div className="flex justify-between items-baseline mb-1">
-          <h3 className="font-display text-xl text-[#111] tracking-tight">{product.name}</h3>
-          <p className="font-display text-lg text-[#111]">₹{product.price}</p>
+      {/*  Typography Section - Made Fully Responsive for 2-column mobile grid */}
+      <div className="p-3 md:p-6 flex flex-col bg-white flex-grow">
+        <div className="flex justify-between items-start gap-2 mb-1">
+          {/* line-clamp-1 prevents extremely long names from breaking the grid on mobile */}
+          <h3 className="font-display text-sm md:text-xl text-[#111] tracking-tight line-clamp-1">
+            {product.name}
+          </h3>
+          <p className="font-display text-xs md:text-lg text-[#111] whitespace-nowrap">
+            ₹{product.price}
+          </p>
         </div>
-        <p className="text-sm text-gray-500 font-sans">{product.tagline || product.description?.substring(0, 50) + "..."}</p>
+        <p className="text-[10px] md:text-sm text-gray-500 font-sans line-clamp-2 md:line-clamp-none">
+          {product.tagline || product.description?.substring(0, 50) + "..."}
+        </p>
       </div>
 
-      {/* Footer Area */}
+      {/*  Footer Area - Button spacing and size adjusted for mobile */}
       <div className="mt-auto" onClick={(e) => e.stopPropagation()}>
         {customFooter ? (
           // Render custom action (like Bundle Counters)
@@ -101,13 +108,13 @@ export const ProductCard = ({ product, index = 0, customFooter }: ProductCardPro
         ) : (
           // Default Add to Cart
           <div 
-            className="w-full border-t border-gray-100 py-4 px-6 flex items-center justify-center gap-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#111] bg-white group-hover:bg-[#111] group-hover:text-white transition-colors duration-300 disabled:opacity-50"
+            className="w-full border-t border-gray-100 py-3 md:py-4 px-2 md:px-6 flex items-center justify-center gap-2 md:gap-3 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] text-[#111] bg-white group-hover:bg-[#111] group-hover:text-white transition-colors duration-300 disabled:opacity-50"
             onClick={handleAddToCart}
           >
             {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
             ) : (
-              <ShoppingBag className="w-4 h-4" />
+              <ShoppingBag className="w-3 h-3 md:w-4 md:h-4" />
             )}
             {isLoading ? "ADDING..." : "ADD TO CART"}
           </div>
