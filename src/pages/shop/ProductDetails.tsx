@@ -9,6 +9,7 @@ import { addToCart } from "../../store/slices/cartSlice";
 
 // Component Imports
 import { ProductReviews } from "../../components/product/ProductReviews";
+import { Button } from "../../components/ui/Button"; // 🚀 IMPORTED CUSTOM BUTTON
 
 // API Hooks Import
 import { 
@@ -385,11 +386,11 @@ export const ProductDetails = () => {
                 })}
               </div>
 
-              {/* Action Area: Quantity, Add to Cart */}
+              {/*  Action Area: Quantity, Add to Cart (UPDATED WITH CUSTOM BUTTON) */}
               <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
                 
                 {/* Quantity Selector */}
-                <div className="flex items-center border border-gray-300 h-14 w-full sm:w-32">
+                <div className="flex items-center border border-gray-300 w-full sm:w-32 py-4">
                   <button 
                     onClick={() => setQuantity(Math.max(1, quantity - 1))} 
                     disabled={quantity <= 1}
@@ -410,11 +411,12 @@ export const ProductDetails = () => {
                   </button>
                 </div>
 
-                {/* Primary Add to Cart */}
-                <button 
+                {/* Primary Add to Cart (CUSTOM BUTTON) */}
+                <Button 
+                  variant="primary"
                   disabled={currentStock === 0 || isAddingToCart}
                   onClick={handleAddToCart}
-                  className="flex-1 h-14 bg-black text-white text-[13px] font-bold tracking-[0.15em] uppercase hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 w-full"
+                  className="flex-1 w-full flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAddingToCart && <Loader2 className="w-4 h-4 animate-spin" />}
                   {currentStock === 0 
@@ -422,7 +424,7 @@ export const ProductDetails = () => {
                     : isAddingToCart 
                       ? "ADDING..." 
                       : `ADD TO CART — ₹${(currentPrice * quantity).toLocaleString()}`}
-                </button>
+                </Button>
 
               </div>
 
