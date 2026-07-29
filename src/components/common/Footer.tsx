@@ -45,10 +45,27 @@ export const Footer = () => {
           {/* Socials */}
           <div className="flex flex-col space-y-4">
             <h4 className="font-sans font-bold text-black text-xs uppercase tracking-[0.2em] mb-2">Follow Us</h4>
-            <a href="#" className="text-sm text-gray-500 hover:text-black transition-colors">Instagram</a>
-            <a href="#" className="text-sm text-gray-500 hover:text-black transition-colors">Twitter / X</a>
-            <a href="#" className="text-sm text-gray-500 hover:text-black transition-colors">Facebook</a>
-            <a href="#" className="text-sm text-gray-500 hover:text-black transition-colors">TikTok</a>
+            
+            <a 
+              href="https://www.instagram.com/sobperfumes_official?utm_source=qr&igsh=MW5rYnp2b25nYWd2Zw==" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-sm text-gray-500 hover:text-black transition-colors"
+            >
+              Instagram
+            </a>
+            
+            <a 
+              href="https://www.facebook.com/share/1BvmuaLNa3/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-sm text-gray-500 hover:text-black transition-colors"
+            >
+              Facebook
+            </a>
+            
+            {/* <a href="#" className="text-sm text-gray-500 hover:text-black transition-colors">Twitter / X</a>
+            <a href="#" className="text-sm text-gray-500 hover:text-black transition-colors">TikTok</a> */}
           </div>
 
         </div>

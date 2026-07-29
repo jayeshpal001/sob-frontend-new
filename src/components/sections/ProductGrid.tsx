@@ -10,14 +10,13 @@ export const ProductGrid = () => {
 
   const products = response?.data || [];
   
-  // 🚀 Smart Filter: Only keeps products with "Best" or "New" in their badge, then takes the top 4
   const featuredProducts = products.filter((product: any) => {
     const badge = product.badge?.toLowerCase() || "";
     return badge.includes("best") || badge.includes("new");
   }).slice(0, 4);
 
   return (
-    <section className="w-full bg-white py-24">
+    <section className="w-full bg-white py-10">
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         
         {/* Section Header */}
@@ -61,7 +60,6 @@ export const ProductGrid = () => {
             Unable to load the collection at this moment.
           </div>
         ) : featuredProducts.length > 0 ? (
-          /* 🚀 UPDATED GRID: 2 cols on mobile, 3 on tablet, 4 on desktop (Makes cards smaller & compact) */
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
             {featuredProducts.map((product: any, index: number) => (
               <ProductCard key={product._id} product={product} index={index} />

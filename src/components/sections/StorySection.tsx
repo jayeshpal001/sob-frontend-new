@@ -3,9 +3,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const storyImages = [
-  "/story-1.jpeg", 
-  "/story-2.jpeg", 
-  "/story-3.jpeg"
+
+  "/story-4.png", 
+  "/story-5.png",
+  "/story-6.png",
 ];
 
 export const StorySection = () => {
@@ -40,7 +41,7 @@ export const StorySection = () => {
               transition={{ duration: 0.8, ease: "easeInOut" }}
               src={storyImages[currentImageIndex]} 
               alt="Crafted with Obsession" 
-              className="absolute inset-0 w-full h-full "
+              className="absolute inset-0 w-full h-full object-cover object-center"
             />
           </AnimatePresence>
 

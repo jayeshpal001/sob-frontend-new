@@ -8,6 +8,7 @@ import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import { SplashScreen } from "./components/common/SplashScreen";
 import { PageLoader } from "./components/common/PageLoader";
 import { AdminProtectedRoute } from "./components/admin/AdminProtectedRoute";
+import { FloatingContact } from "./components/ui/FloatingContact"; 
 
 // Customer Pages
 const Home = lazy(() => import("./pages/shop/Home").then((m) => ({ default: m.Home })));
@@ -43,7 +44,8 @@ function App() {
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+      
       smoothWheel: true,
     });
 
@@ -122,6 +124,10 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
+        
+        {/* ADDED HERE: Outside routes but inside Suspense so it shows everywhere */}
+        <FloatingContact />
+        
       </Suspense>
     </>
   );

@@ -77,7 +77,6 @@ export const Navbar = () => {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100"
       >
-        {/* Added gap-8 to maintain spacing between logo and nav */}
         <div className="max-w-[1600px] mx-auto px-6 md:px-12 h-24 flex justify-between items-center gap-8">
           
           {/* Left: Hamburger (Mobile Only) & Logo */}
@@ -100,7 +99,7 @@ export const Navbar = () => {
             </Link>
           </div>
 
-          {/* Right Navigation & Cart - Changed to flex-1 so it takes all remaining space */}
+          {/* Right Navigation & Cart */}
           <div className="flex-1 flex justify-end items-center gap-6 lg:gap-8 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-900">
             
             <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
@@ -108,10 +107,8 @@ export const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.href}
-                  // Added flex-shrink-0 and pb-1 to stop text from squishing and slicing
                   className="relative group overflow-hidden flex-shrink-0 pb-1"
                 >
-                  {/* Added whitespace-nowrap so text stays on one line */}
                   <span className="group-hover:text-black transition-colors duration-300 block whitespace-nowrap">
                     {link.name}
                   </span>
@@ -185,44 +182,63 @@ export const Navbar = () => {
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 bg-gray-50 rounded-full"
+                className="p-2 bg-gray-50 hover:bg-gray-100 transition-colors rounded-full"
               >
-                <X strokeWidth={1.5} className="w-6 h-6" />
+                <X strokeWidth={1.5} className="w-6 h-6 text-gray-900" />
               </button>
             </div>
 
-            {/* Mobile Menu Links */}
-            <div className="flex-1 flex flex-col justify-center px-12 gap-8">
-              {navLinks.map((link, i) => (
-                <motion.div
-                  key={link.name}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + i * 0.1, duration: 0.5 }}
-                >
-                  <Link
-                    to={link.href}
-                    className="text-4xl font-display text-black block w-fit"
+            <div className="flex-1 flex flex-col pt-8 px-8 overflow-y-auto">
+              
+              {/* Links List */}
+              <div className="flex flex-col">
+                {navLinks.map((link, i) => (
+                  <motion.div
+                    key={link.name}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 + i * 0.1, duration: 0.4 }}
+                    className="border-b border-gray-100"
                   >
-                    {link.name}
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link
+                      to={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="py-5 text-2xl font-display text-gray-900 flex justify-between items-center w-full hover:text-gray-600 transition-colors"
+                    >
+                      {link.name}
+                      {/* Luxury subtle plus icon to indicate clickable link */}
+                      <span className="text-gray-300 font-sans text-xl font-light">+</span>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
 
+              {/* Bottom Actions & Support Section */}
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
-                className="mt-8 pt-8 border-t border-gray-100"
+                className="mt-10 flex flex-col gap-8 pb-12"
               >
+                {/* Account Login/Register */}
                 <Link
                   to={isAuthenticated ? "/profile" : "/auth"}
-                  className="flex items-center gap-4 text-sm font-bold uppercase tracking-widest text-gray-500"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-900 bg-gray-50 p-4 rounded-sm"
                 >
-                  <User className="w-5 h-5" />
+                  <User className="w-4 h-4" />
                   {isAuthenticated ? "My Account" : "Sign In / Register"}
                 </Link>
+
+                {/* Support Info to fill empty space aesthetically */}
+                <div className="flex flex-col gap-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Need Help?</p>
+                  <a href="mailto:contact@sobperfumes.com" className="text-sm text-gray-600 underline underline-offset-4 decoration-gray-300">
+                    contact@sobperfumes.com
+                  </a>
+                </div>
               </motion.div>
+              
             </div>
           </motion.div>
         )}

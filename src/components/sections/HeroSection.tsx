@@ -27,7 +27,7 @@ export const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative min-h-[calc(100vh-96px)] w-full overflow-hidden flex items-center justify-center bg-white py-12 lg:py-0 ">
+    <section className="relative min-h-[calc(100vh-96px)] w-full overflow-hidden flex flex-col lg:flex-row items-center justify-center bg-white py-12 lg:py-0 ">
       
       {/* Subtle Background Texture/Text */}
       <motion.div 
@@ -39,7 +39,7 @@ export const HeroSection = () => {
         LUXURY
       </motion.div>
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 items-center w-full max-w-[1600px] mx-auto px-6 md:px-12 gap-8 lg:gap-0 h-full">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 items-center w-full max-w-[1600px] mx-auto px-6 md:px-12 gap-0 lg:gap-8 h-full flex-grow">
         
         {/* Left Side: Typography & CTA */}
         <div className="lg:col-span-5 flex flex-col items-start text-left space-y-4 lg:space-y-5 z-30 pt-8 lg:pt-0">
@@ -115,7 +115,7 @@ export const HeroSection = () => {
         </div>
 
         {/* Right Side: Marble Plinth + Animated Image Slider */}
-        <div className="lg:col-span-7 relative flex items-center justify-center w-full h-[400px] md:h-[500px] lg:h-[750px] mt-6 lg:mt-0">
+        <div className="lg:col-span-7 relative flex items-center justify-center w-full h-[320px] md:h-[500px] lg:h-[750px] mt-0 lg:mt-0">
           
           {/* Layer 1: Marble Plinth (Static Background Base) */}
           <motion.img
@@ -124,20 +124,20 @@ export const HeroSection = () => {
             transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
             src="/travertine-plinth.png" 
             alt="Luxury Base" 
-            className="absolute top-1/2 left-1/2 w-[75%] lg:w-[70%] max-w-[280px] lg:max-w-[500px] object-contain drop-shadow-xl z-10 pointer-events-none"
-            style={{ x: "-50%", y: "15%" }} 
+            className="lg:mt-6 mt-3 absolute top-1/2 left-1/2 w-[90%] lg:w-[70%] max-w-[340px] lg:max-w-[500px] object-contain drop-shadow-xl z-10 pointer-events-none"
+            style={{ x: "-50%", y: "10%" }} 
           />
 
           {/* Layer 2: Floating & Fading Image Slider */}
           <motion.div
-            animate={{ y: ["-55%", "-60%", "-55%"] }} // Gentle floating effect
+            animate={{ y: ["-50%", "-55%", "-50%"] }} // Gentle floating effect
             transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-            className="absolute top-1/2 left-1/2 w-[75%] lg:w-[70%] max-w-[280px] lg:max-w-[480px] z-20 pointer-events-none flex items-center justify-center"
-            style={{ x: "-50%", y: "-55%" }} 
+            className="absolute top-1/2 left-1/2 w-[85%] lg:w-[70%] max-w-[300px] lg:max-w-[480px] z-20 pointer-events-none flex items-center justify-center"
+            style={{ x: "-50%", y: "-50%" }} 
           >
             <AnimatePresence mode="wait">
               <motion.img 
-                key={currentImageIndex} // React uses this key to trigger the AnimatePresence unmount/mount animation
+                key={currentImageIndex} 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.05 }}

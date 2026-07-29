@@ -9,7 +9,7 @@ import { addToCart } from "../../store/slices/cartSlice";
 
 // Component Imports
 import { ProductReviews } from "../../components/product/ProductReviews";
-import { Button } from "../../components/ui/Button"; // 🚀 IMPORTED CUSTOM BUTTON
+import { Button } from "../../components/ui/Button"; // IMPORTED CUSTOM BUTTON
 
 // API Hooks Import
 import { 
