@@ -467,7 +467,7 @@ export const Checkout = () => {
                   </span>
                 </div>
 
-                <div
+                {/* <div
                   onClick={() => setPaymentMethod("COD")}
                   className={`border p-6 cursor-pointer flex flex-col items-center gap-3 transition-colors ${paymentMethod === "COD" ? "border-black bg-gray-50" : "border-gray-200 hover:border-gray-300"}`}
                 >
@@ -480,7 +480,7 @@ export const Checkout = () => {
                       (Pay at your doorstep)
                     </span>
                   </span>
-                </div>
+                </div> */}
               </div>
 
               <div className="p-6 bg-[var(--color-surface)] border border-gray-100 flex flex-col items-center justify-center py-10">
